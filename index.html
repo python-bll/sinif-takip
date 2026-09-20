@@ -12,6 +12,22 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
 
+    <!-- PASSWORD MODAL -->
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full border border-slate-100 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">🔒</div>
+                <h2 class="text-xl font-black text-slate-900">Bulut Bağlantı Şifresi</h2>
+                <p class="text-xs text-slate-500">Sınıf paneline erişmek ve bulut verilerini senkronize etmek için lütfen şifreyi girin.</p>
+            </div>
+            <div class="space-y-3">
+                <input type="password" id="cloudPasswordInput" placeholder="Şifrenizi girin..." class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                <button onclick="verifyPassword()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-md transition-all">Bağlan ve Giriş Yap</button>
+                <p id="passwordError" class="text-xs text-rose-600 text-center font-medium hidden">Hatalı şifre! Lütfen tekrar deneyin.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
         
         <!-- Header & Status -->
@@ -20,9 +36,12 @@
                 <h1 class="text-2xl font-black text-slate-900 tracking-tight">Sınıf Takip & Ağırlıklandırma Paneli</h1>
                 <p class="text-xs text-slate-500 mt-1">Bulut Senkronizasyonu Aktif • Tüm cihazlarınızda anlık güncellenir</p>
             </div>
-            <div id="connectionStatus" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                Buluta bağlanılıyor...
+            <div class="flex items-center gap-3">
+                <div id="connectionStatus" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    Buluta bağlanılıyor...
+                </div>
+                <button onclick="retryConnection()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold transition-all">Yeniden Bağlan</button>
             </div>
         </div>
         
@@ -136,6 +155,8 @@
             projectId: "dummy-project"
         };
 
+        const CLOUD_PASSWORD = "123"; // İstediğiniz şifreyi buradan değiştirebilirsiniz
+
         let app, db, auth;
         let isCloudReady = false;
 
@@ -148,8 +169,19 @@
             behWeight: 50
         };
 
-        // Corrected path with even number of segments: artifacts/{appId} (collection, doc) + publicData/classroomState (collection, doc) -> total 4 segments
         let docRefPath;
+
+        window.verifyPassword = function() {
+            const inputVal = document.getElementById('cloudPasswordInput').value;
+            const errorEl = document.getElementById('passwordError');
+
+            if (inputVal === CLOUD_PASSWORD) {
+                document.getElementById('passwordModal').classList.add('hidden');
+                initFirebase();
+            } else {
+                errorEl.classList.remove('hidden');
+            }
+        };
 
         async function initFirebase() {
             try {
@@ -196,11 +228,16 @@
         }
 
         async function saveToCloud() {
+            // Always save to local storage as safety backup
+            localStorage.setItem('classroom_tracker_local', JSON.stringify(appState));
+
             if (!isCloudReady || !docRefPath) return;
             try {
                 await setDoc(docRefPath, appState);
+                setConnectionStatus(true);
             } catch (err) {
-                console.error("Error saving data:", err);
+                console.error("Error saving data to cloud:", err);
+                setConnectionStatus(false);
             }
         }
 
@@ -210,8 +247,8 @@
                 el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200";
                 el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Bulut Senkronize';
             } else {
-                el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200";
-                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Çevrimdışı';
+                el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200";
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span> Yerel Mod (Çevrimdışı)';
             }
         }
 
@@ -395,8 +432,6 @@
                 tbody.appendChild(tr);
             });
         }
-
-        window.onload = initFirebase;
     </script>
 
 </body>
