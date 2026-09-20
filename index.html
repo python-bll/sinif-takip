@@ -2,340 +2,402 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Sınıf Takip ve Puanlama Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulut Destekli Sınıf Takip ve Ağırlıklandırma Paneli</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1100px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1 { font-size: 20px; margin-bottom: 10px; }
-        .section { margin-bottom: 20px; padding: 15px; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; }
-        input, button, textarea { padding: 8px; margin: 5px 0; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; overflow-x: auto; display: block; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; white-space: nowrap; }
-        th { background: #eee; }
-        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; margin: 0 2px; }
-        button:hover { background: #0056b3; }
-        .btn-danger { background: #dc3545; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-success { background: #28a745; }
-        .btn-success:hover { background: #218838; }
-        .btn-warning { background: #ffc107; color: #333; }
-        .btn-warning:hover { background: #e0a800; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { padding: 10px 20px; background: #ddd; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .tab-btn.active { background: #007bff; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
 
-<div class="container">
-    <h1>Sınıf Takip ve Puanlama Paneli</h1>
-    
-    <!-- Sekmeler -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('homework', event)">Ödevler</button>
-        <button class="tab-btn" onclick="switchTab('behavior', event)">Sınıf İçi / Diğer Durumlar</button>
-        <button class="tab-btn" onclick="switchTab('summary', event)">Genel Özet & Ağırlık</button>
-    </div>
-
-    <!-- ÖDEVLER SEKMESİ -->
-    <div id="homework-tab" class="tab-content active">
-        <div class="section">
-            <h3>Yeni Ödev Ekle</h3>
-            <input type="text" id="hwName" placeholder="Örn: Ödev 1 (Matematik)">
-            <button class="btn-success" onclick="addHomework()">Ödev Ekle</button>
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
+        
+        <!-- Header & Status -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Sınıf Takip & Ağırlıklandırma Paneli</h1>
+                <p class="text-xs text-slate-500 mt-1">Bulut Senkronizasyonu Aktif • Tüm cihazlarınızda anlık güncellenir</p>
+            </div>
+            <div id="connectionStatus" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Buluta bağlanılıyor...
+            </div>
         </div>
-        <div class="section">
-            <h3>Ödev Puan Tablosu</h3>
-            <table id="hwTable">
-                <thead>
-                    <tr id="hwHeaderRow">
-                        <th>Öğrenci</th>
-                        <th>Toplam Ödev Puanı</th>
-                    </tr>
-                </thead>
-                <tbody id="hwBody"></tbody>
-            </table>
+        
+        <!-- Navigation Tabs -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b pb-4">
+            <button onclick="switchTab('homework')" id="btn-homework" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200">Ödevler</button>
+            <button onclick="switchTab('behavior')" id="btn-behavior" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Sınıf İçi / Diğer Durumlar</button>
+            <button onclick="switchTab('summary')" id="btn-summary" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Genel Özet & Ağırlık</button>
         </div>
-    </div>
 
-    <!-- DİĞER DURUMLAR SEKMESİ -->
-    <div id="behavior-tab" class="tab-content">
-        <div class="section">
-            <h3>Yeni Durum / Kriter Ekle</h3>
-            <input type="text" id="behName" placeholder="Örn: Derse Katılım">
-            <button class="btn-success" onclick="addBehavior()">Durum Ekle</button>
+        <!-- HOMEWORK TAB -->
+        <div id="tab-homework" class="tab-content space-y-6">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center">
+                <input type="text" id="hwNameInput" placeholder="Yeni Ödev Adı (Örn: Ödev 1 - Matematik)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <button onclick="addHomework()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">+ Ödev Ekle</button>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse" id="hwTable">
+                    <thead>
+                        <tr id="hwHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hwBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic student homework scores -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="section">
-            <h3>Sınıf İçi Durum Puan Tablosu</h3>
-            <table id="behTable">
-                <thead>
-                    <tr id="behHeaderRow">
-                        <th>Öğrenci</th>
-                        <th>Toplam Durum Puanı</th>
-                    </tr>
-                </thead>
-                <tbody id="behBody"></tbody>
-            </table>
+
+        <!-- BEHAVIOR TAB -->
+        <div id="tab-behavior" class="tab-content hidden space-y-6">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center">
+                <input type="text" id="behNameInput" placeholder="Yeni Kriter Adı (Örn: Derse Katılım)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <button onclick="addBehavior()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">+ Kriter Ekle</button>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse" id="behTable">
+                    <thead>
+                        <tr id="behHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Toplam Durum Puanı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="behBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic student behavior scores -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <!-- ÖZET SEKMESİ -->
-    <div id="summary-tab" class="tab-content">
-        <div class="section">
-            <h3>Genel Değerlendirme ve Oransal Ağırlık</h3>
-            <p>Ödevler Etki Oranı (%): <input type="number" id="hwWeight" value="50" onchange="saveData(); renderAll();" style="width:70px;"> | 
-               Diğer Durumlar Etki Oranı (%): <input type="number" id="behWeight" value="50" onchange="saveData(); renderAll();" style="width:70px;"></p>
-            <table id="summaryTable">
-                <thead>
-                    <tr>
-                        <th>Öğrenci</th>
-                        <th>Ödev Ortalaması</th>
-                        <th>Durum Ortalaması</th>
-                        <th>Genel Başarı Puanı</th>
-                    </tr>
-                </thead>
-                <tbody id="summaryBody"></tbody>
-            </table>
+        <!-- SUMMARY & WEIGHTS TAB -->
+        <div id="tab-summary" class="tab-content hidden space-y-6">
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 flex flex-col md:flex-row gap-6 items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm">Oransal Etki Dağılımı</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Toplam ağırlık yüzdeleri genel başarı puanını doğrudan etkiler.</p>
+                </div>
+                <div class="flex items-center gap-4 w-full md:w-auto">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-600">Ödevler (%):</label>
+                        <input type="number" id="hwWeightInput" value="50" onchange="updateWeights()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-600">Kriterler (%):</label>
+                        <input type="number" id="behWeightInput" value="50" onchange="updateWeights()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse" id="summaryTable">
+                    <thead>
+                        <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Ödev Ortalaması</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Durum Ortalaması</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Genel Başarı Puanı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic summary rows -->
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- GLOBAL STUDENT MANAGEMENT -->
+        <div class="mt-8 pt-6 border-t border-slate-200 bg-slate-50/50 p-5 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div class="w-full sm:w-auto">
+                <h3 class="font-bold text-slate-800 text-sm">Yeni Öğrenci Kaydı</h3>
+                <p class="text-xs text-slate-500">Sınıfa yeni bir öğrenci ekleyin.</p>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 sm:w-72 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <button onclick="addStudent()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Öğrenci Ekle</button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ORTAK ÖĞRENCİ EKLEME -->
-    <div class="section" style="margin-top: 30px; background: #e9ecef;">
-        <h3>Sınıfa Öğrenci Ekle</h3>
-        <input type="text" id="studentName" placeholder="Öğrenci Adı Soyadı">
-        <button onclick="addStudent()">Öğrenciyi Kaydet</button>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- VERİ TAŞIMA / YEDEKLEME ALANI -->
-    <div class="section" style="margin-top: 20px; background: #fff3cd; border-color: #ffeeba;">
-        <h3>Cihazlar Arası Veri Senkronizasyonu (Yedekleme)</h3>
-        <p style="font-size: 13px; color: #856404;">Başka bir cihaza (telefona vb.) geçerken verilerini aktarmak için aşağıdaki butona basıp kodu kopyala ve diğer cihazda kutucuğa yapıştır.</p>
-        <button class="btn-warning" onclick="exportData()">Veri Kodunu Kopyala</button>
-        <br><br>
-        <textarea id="dataCodeInput" placeholder="Başka cihazdan aldığın kodu buraya yapıştır..." style="width: 100%; height: 60px;"></textarea>
-        <br>
-        <button class="btn-success" onclick="importData()">Kodu Yapıştır ve Verileri Yükle</button>
-    </div>
-</div>
-
-<script>
-    let students = JSON.parse(localStorage.getItem('tracker_students')) || [];
-    let homeworks = JSON.parse(localStorage.getItem('tracker_homeworks')) || ["Ödev 1"];
-    let behaviors = JSON.parse(localStorage.getItem('tracker_behaviors')) || ["Derse Katılım"];
-
-    window.onload = function() {
-        if(localStorage.getItem('tracker_hwWeight')) document.getElementById('hwWeight').value = localStorage.getItem('tracker_hwWeight');
-        if(localStorage.getItem('tracker_behWeight')) document.getElementById('behWeight').value = localStorage.getItem('tracker_behWeight');
-        renderAll();
-    };
-
-    function saveData() {
-        localStorage.setItem('tracker_students', JSON.stringify(students));
-        localStorage.setItem('tracker_homeworks', JSON.stringify(homeworks));
-        localStorage.setItem('tracker_behaviors', JSON.stringify(behaviors));
-        localStorage.setItem('tracker_hwWeight', document.getElementById('hwWeight').value);
-        localStorage.setItem('tracker_behWeight', document.getElementById('behWeight').value);
-    }
-
-    function exportData() {
-        const allData = {
-            students: students,
-            homeworks: homeworks,
-            behaviors: behaviors,
-            hwWeight: document.getElementById('hwWeight').value,
-            behWeight: document.getElementById('behWeight').value
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'classroom-tracker-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDummyKeyForFallbackOnly",
+            authDomain: "dummy.firebaseapp.com",
+            projectId: "dummy-project"
         };
-        const jsonString = JSON.stringify(allData);
-        navigator.clipboard.writeText(jsonString).then(() => {
-            alert("Veri kodu panoya kopyalandı! Diğer cihazda ilgili kutucuğa yapıştırabilirsin.");
-        }).catch(err => {
-            prompt("Kopyalanamadı, bu metni kopyalayın:", jsonString);
-        });
-    }
 
-    function importData() {
-        const code = document.getElementById('dataCodeInput').value.trim();
-        if(!code) {
-            alert("Lütfen geçerli bir veri kodu yapıştırın!");
-            return;
-        }
-        try {
-            const parsed = JSON.parse(code);
-            if(parsed.students && parsed.homeworks && parsed.behaviors) {
-                students = parsed.students;
-                homeworks = parsed.homeworks;
-                behaviors = parsed.behaviors;
-                if(parsed.hwWeight) document.getElementById('hwWeight').value = parsed.hwWeight;
-                if(parsed.behWeight) document.getElementById('behWeight').value = parsed.behWeight;
-                saveData();
-                renderAll();
-                alert("Veriler başarıyla yüklendi ve güncellendi!");
-                document.getElementById('dataCodeInput').value = '';
-            } else {
-                alert("Geçersiz veri formatı!");
+        let app, db, auth;
+        let isCloudReady = false;
+
+        // In-memory application state
+        let appState = {
+            students: [],
+            homeworks: ["Ödev 1"],
+            behaviors: ["Derse Katılım"],
+            hwWeight: 50,
+            behWeight: 50
+        };
+
+        // Corrected path with even number of segments: artifacts/{appId} (collection, doc) + publicData/classroomState (collection, doc) -> total 4 segments
+        let docRefPath;
+
+        async function initFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                docRefPath = doc(db, 'artifacts', appId, 'publicData', 'classroomState');
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Real-time listener for multi-device sync
+                onSnapshot(docRefPath, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        appState.students = data.students || [];
+                        appState.homeworks = data.homeworks || ["Ödev 1"];
+                        appState.behaviors = data.behaviors || ["Derse Katılım"];
+                        appState.hwWeight = data.hwWeight !== undefined ? data.hwWeight : 50;
+                        appState.behWeight = data.behWeight !== undefined ? data.behWeight : 50;
+
+                        document.getElementById('hwWeightInput').value = appState.hwWeight;
+                        document.getElementById('behWeightInput').value = appState.behWeight;
+
+                        renderUI();
+                    } else {
+                        saveToCloud(); // Save initial state if empty
+                    }
+                    setConnectionStatus(true);
+                }, (error) => {
+                    console.error("Firestore sync error:", error);
+                    setConnectionStatus(false);
+                });
+
+                isCloudReady = true;
+            } catch (err) {
+                console.error("Firebase initialization failed:", err);
+                setConnectionStatus(false);
             }
-        } catch(e) {
-            alert("Hatalı kod! Kodun tamamını doğru kopyaladığınızdan emin olun.");
         }
-    }
 
-    function switchTab(tabName, evt) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
-        if(tabName === 'homework') {
-            document.getElementById('homework-tab').classList.add('active');
-        } else if(tabName === 'behavior') {
-            document.getElementById('behavior-tab').classList.add('active');
-        } else if(tabName === 'summary') {
-            document.getElementById('summary-tab').classList.add('active');
+        async function saveToCloud() {
+            if (!isCloudReady || !docRefPath) return;
+            try {
+                await setDoc(docRefPath, appState);
+            } catch (err) {
+                console.error("Error saving data:", err);
+            }
         }
-        if(evt && evt.target) {
-            evt.target.classList.add('active');
+
+        function setConnectionStatus(connected) {
+            const el = document.getElementById('connectionStatus');
+            if (connected) {
+                el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200";
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Bulut Senkronize';
+            } else {
+                el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200";
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Çevrimdışı';
+            }
         }
-        renderAll();
-    }
 
-    function addStudent() {
-        const nameInput = document.getElementById('studentName');
-        if(!nameInput.value) return;
-        
-        students.push({
-            name: nameInput.value,
-            hwScores: new Array(homeworks.length).fill(0),
-            behScores: new Array(behaviors.length).fill(0)
-        });
-        nameInput.value = '';
-        saveData();
-        renderAll();
-    }
-
-    function addHomework() {
-        const input = document.getElementById('hwName');
-        if(!input.value) return;
-        homeworks.push(input.value);
-        students.forEach(st => st.hwScores.push(0));
-        input.value = '';
-        saveData();
-        renderAll();
-    }
-
-    function addBehavior() {
-        const input = document.getElementById('behName');
-        if(!input.value) return;
-        behaviors.push(input.value);
-        students.forEach(st => st.behScores.push(0));
-        input.value = '';
-        saveData();
-        renderAll();
-    }
-
-    function updateHwScore(stIndex, hwIndex, val) {
-        students[stIndex].hwScores[hwIndex] += val;
-        saveData();
-        renderAll();
-    }
-
-    function updateBehScore(stIndex, behIndex, val) {
-        students[stIndex].behScores[behIndex] += val;
-        saveData();
-        renderAll();
-    }
-
-    function renderAll() {
-        renderHomeworkTable();
-        renderBehaviorTable();
-        renderSummaryTable();
-    }
-
-    function renderHomeworkTable() {
-        const headerRow = document.getElementById('hwHeaderRow');
-        let html = '<th>Öğrenci</th>';
-        homeworks.forEach((hw) => {
-            html += `<th>${hw}</th>`;
-        });
-        html += '<th>Toplam Ödev Puanı</th>';
-        headerRow.innerHTML = html;
-
-        const tbody = document.getElementById('hwBody');
-        tbody.innerHTML = '';
-
-        students.forEach((st, sIdx) => {
-            let tr = document.createElement('tr');
-            let rowHtml = `<td><b>${st.name}</b></td>`;
-            let totalHw = 0;
-
-            st.hwScores.forEach((score, hIdx) => {
-                totalHw += score;
-                rowHtml += `<td>
-                    ${score} 
-                    <button onclick="updateHwScore(${sIdx}, ${hIdx}, 1)">+</button>
-                    <button onclick="updateHwScore(${sIdx}, ${hIdx}, -1)">-</button>
-                </td>`;
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.className = "tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200";
             });
-            rowHtml += `<td><b>${totalHw}</b></td>`;
-            tr.innerHTML = rowHtml;
-            tbody.appendChild(tr);
-        });
-    }
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`btn-${tab}`).className = "tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200";
+        }
 
-    function renderBehaviorTable() {
-        const headerRow = document.getElementById('behHeaderRow');
-        let html = '<th>Öğrenci</th>';
-        behaviors.forEach((beh) => {
-            html += `<th>${beh}</th>`;
-        });
-        html += '<th>Toplam Durum Puanı</th>';
-        headerRow.innerHTML = html;
+        window.addStudent = function() {
+            const input = document.getElementById('newStudentName');
+            const name = input.value.trim();
+            if (!name) return;
 
-        const tbody = document.getElementById('behBody');
-        tbody.innerHTML = '';
-
-        students.forEach((st, sIdx) => {
-            let tr = document.createElement('tr');
-            let rowHtml = `<td><b>${st.name}</b></td>`;
-            let totalBeh = 0;
-
-            st.behScores.forEach((score, bIdx) => {
-                totalBeh += score;
-                rowHtml += `<td>
-                    ${score} 
-                    <button onclick="updateBehScore(${sIdx}, ${bIdx}, 1)">+</button>
-                    <button onclick="updateBehScore(${sIdx}, ${bIdx}, -1)">-</button>
-                </td>`;
+            appState.students.push({
+                name: name,
+                hwScores: new Array(appState.homeworks.length).fill(0),
+                behScores: new Array(appState.behaviors.length).fill(0)
             });
-            rowHtml += `<td><b>${totalBeh}</b></td>`;
-            tr.innerHTML = rowHtml;
-            tbody.appendChild(tr);
-        });
-    }
+            input.value = '';
+            saveToCloud();
+            renderUI();
+        }
 
-    function renderSummaryTable() {
-        const tbody = document.getElementById('summaryBody');
-        tbody.innerHTML = '';
+        window.addHomework = function() {
+            const input = document.getElementById('hwNameInput');
+            const name = input.value.trim();
+            if (!name) return;
 
-        const hwWeight = parseFloat(document.getElementById('hwWeight').value) || 0;
-        const behWeight = parseFloat(document.getElementById('behWeight').value) || 0;
+            appState.homeworks.push(name);
+            appState.students.forEach(st => st.hwScores.push(0));
+            input.value = '';
+            saveToCloud();
+            renderUI();
+        }
 
-        students.forEach(st => {
-            let avgHw = st.hwScores.length > 0 ? st.hwScores.reduce((a, b) => a + b, 0) / st.hwScores.length : 0;
-            let avgBeh = st.behScores.length > 0 ? st.behScores.reduce((a, b) => a + b, 0) / st.behScores.length : 0;
-            
-            let generalScore = (avgHw * (hwWeight / 100)) + (avgBeh * (behWeight / 100));
+        window.addBehavior = function() {
+            const input = document.getElementById('behNameInput');
+            const name = input.value.trim();
+            if (!name) return;
 
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><b>${st.name}</b></td>
-                <td>${avgHw.toFixed(2)}</td>
-                <td>${avgBeh.toFixed(2)}</td>
-                <td><b>${generalScore.toFixed(2)}</b></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-</script>
+            appState.behaviors.push(name);
+            appState.students.forEach(st => st.behScores.push(0));
+            input.value = '';
+            saveToCloud();
+            renderUI();
+        }
+
+        window.updateHwScore = function(stIndex, hwIndex, val) {
+            appState.students[stIndex].hwScores[hwIndex] += val;
+            saveToCloud();
+            renderUI();
+        }
+
+        window.updateBehScore = function(stIndex, behIndex, val) {
+            appState.students[stIndex].behScores[behIndex] += val;
+            saveToCloud();
+            renderUI();
+        }
+
+        window.deleteStudent = function(stIndex) {
+            appState.students.splice(stIndex, 1);
+            saveToCloud();
+            renderUI();
+        }
+
+        window.updateWeights = function() {
+            appState.hwWeight = parseFloat(document.getElementById('hwWeightInput').value) || 0;
+            appState.behWeight = parseFloat(document.getElementById('behWeightInput').value) || 0;
+            saveToCloud();
+            renderUI();
+        }
+
+        function renderUI() {
+            renderHomeworkTable();
+            renderBehaviorTable();
+            renderSummaryTable();
+        }
+
+        function renderHomeworkTable() {
+            const headerRow = document.getElementById('hwHeaderRow');
+            let headerHtml = '<th class="p-3.5 border-b font-semibold">Öğrenci</th>';
+            appState.homeworks.forEach((hw, idx) => {
+                headerHtml += `<th class="p-3.5 border-b font-semibold text-center">${hw}</th>`;
+            });
+            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>';
+            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">İşlem</th>';
+            headerRow.innerHTML = headerHtml;
+
+            const tbody = document.getElementById('hwBody');
+            tbody.innerHTML = '';
+
+            appState.students.forEach((st, sIdx) => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                let rowHtml = `<td class="p-3.5 border-b font-bold text-slate-900">${st.name}</td>`;
+                let totalHw = 0;
+
+                st.hwScores.forEach((score, hIdx) => {
+                    totalHw += score;
+                    rowHtml += `<td class="p-3.5 border-b text-center">
+                        <div class="inline-flex items-center gap-2 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                            <span class="font-bold text-slate-700 w-6 text-center">${score}</span>
+                            <div class="flex flex-col gap-0.5">
+                                <button onclick="updateHwScore(${sIdx}, ${hIdx}, 1)" class="w-5 h-5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">+</button>
+                                <button onclick="updateHwScore(${sIdx}, ${hIdx}, -1)" class="w-5 h-5 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">-</button>
+                            </div>
+                        </div>
+                    </td>`;
+                });
+
+                rowHtml += `<td class="p-3.5 border-b text-center font-black text-blue-600 text-base">${totalHw}</td>`;
+                rowHtml += `<td class="p-3.5 border-b text-center"><button onclick="deleteStudent(${sIdx})" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-lg transition-colors">Sil</button></td>`;
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderBehaviorTable() {
+            const headerRow = document.getElementById('behHeaderRow');
+            let headerHtml = '<th class="p-3.5 border-b font-semibold">Öğrenci</th>';
+            appState.behaviors.forEach((beh) => {
+                headerHtml += `<th class="p-3.5 border-b font-semibold text-center">${beh}</th>`;
+            });
+            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">Toplam Durum Puanı</th>';
+            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">İşlem</th>';
+            headerRow.innerHTML = headerHtml;
+
+            const tbody = document.getElementById('behBody');
+            tbody.innerHTML = '';
+
+            appState.students.forEach((st, sIdx) => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                let rowHtml = `<td class="p-3.5 border-b font-bold text-slate-900">${st.name}</td>`;
+                let totalBeh = 0;
+
+                st.behScores.forEach((score, bIdx) => {
+                    totalBeh += score;
+                    rowHtml += `<td class="p-3.5 border-b text-center">
+                        <div class="inline-flex items-center gap-2 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                            <span class="font-bold text-slate-700 w-6 text-center">${score}</span>
+                            <div class="flex flex-col gap-0.5">
+                                <button onclick="updateBehScore(${sIdx}, ${bIdx}, 1)" class="w-5 h-5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">+</button>
+                                <button onclick="updateBehScore(${sIdx}, ${bIdx}, -1)" class="w-5 h-5 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">-</button>
+                            </div>
+                        </div>
+                    </td>`;
+                });
+
+                rowHtml += `<td class="p-3.5 border-b text-center font-black text-blue-600 text-base">${totalBeh}</td>`;
+                rowHtml += `<td class="p-3.5 border-b text-center"><button onclick="deleteStudent(${sIdx})" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-lg transition-colors">Sil</button></td>`;
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderSummaryTable() {
+            const tbody = document.getElementById('summaryBody');
+            tbody.innerHTML = '';
+
+            const hwW = appState.hwWeight / 100;
+            const behW = appState.behWeight / 100;
+
+            appState.students.forEach(st => {
+                let avgHw = st.hwScores.length > 0 ? st.hwScores.reduce((a, b) => a + b, 0) / st.hwScores.length : 0;
+                let avgBeh = st.behScores.length > 0 ? st.behScores.reduce((a, b) => a + b, 0) / st.behScores.length : 0;
+                let finalScore = (avgHw * hwW) + (avgBeh * behW);
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3.5 border-b font-bold text-slate-900">${st.name}</td>
+                    <td class="p-3.5 border-b text-center text-slate-700">${avgHw.toFixed(2)}</td>
+                    <td class="p-3.5 border-b text-center text-slate-700">${avgBeh.toFixed(2)}</td>
+                    <td class="p-3.5 border-b text-center font-black text-emerald-600 text-lg">${finalScore.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.onload = initFirebase;
+    </script>
 
 </body>
 </html>
