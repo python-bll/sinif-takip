@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sınıf Takip & Ağırlıklandırma Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS (Excel dışa aktarım için) -->
+    <!-- SheetJS (Excel dışa ve içe aktarım için) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @media print {
@@ -67,14 +67,28 @@
 
         <!-- CLASSES TAB -->
         <div id="tab-classes" class="tab-content space-y-4">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between no-print">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base" id="currentClassNameDisplay">Aktif Sınıf: 5-A</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Öğrenci ekleyin veya yönetin.</p>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col gap-3 no-print">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base" id="currentClassNameDisplay">Aktif Sınıf: 5-A</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Tek tek öğrenci ekleyin veya Excel'den toplu öğrenci aktarın.</p>
+                    </div>
+                    <!-- Excel'den Öğrenci Yükleme Butonu -->
+                    <div class="flex items-center gap-2">
+                        <label class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
+                            📊 Excel'den Öğrenci Yükle
+                            <input type="file" id="importStudentsFile" accept=".xlsx, .xls, .csv" onchange="importStudentsFromExcel(event)" class="hidden">
+                        </label>
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 sm:w-64 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
-                    <button onclick="addStudent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">+ Ekle</button>
+                
+                <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-200/60">
+                    <input type="text" id="newStudentNo" placeholder="Öğrenci No" class="w-full sm:w-32 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                    <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                    <button onclick="addStudent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">+ Öğrenci Ekle</button>
+                </div>
+                <div class="text-[11px] text-slate-500">
+                    ℹ️ Excel ile toplu yükleme yaparken dosyanın ilk sütununda <b>Numara</b>, ikinci sütununda <b>Ad Soyad</b> olmalıdır.
                 </div>
             </div>
 
@@ -85,10 +99,11 @@
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse min-w-[300px]" id="classesTable">
+                <table class="w-full text-left border-collapse min-w-[350px]" id="classesTable">
                     <thead>
                         <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
                             <th class="p-3 border-b font-semibold w-12 text-center">#</th>
+                            <th class="p-3 border-b font-semibold w-28">Öğrenci No</th>
                             <th class="p-3 border-b font-semibold">Öğrenci Adı Soyadı</th>
                             <th class="p-3 border-b font-semibold text-center no-print">İşlemler</th>
                         </tr>
@@ -122,6 +137,7 @@
                 <table class="w-full text-left border-collapse min-w-[500px]" id="hwTable">
                     <thead>
                         <tr id="hwHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3 border-b font-semibold w-20">No</th>
                             <th class="p-3 border-b font-semibold">Öğrenci</th>
                             <th class="p-3 border-b font-semibold text-center">Puan</th>
                             <th class="p-3 border-b font-semibold text-center">Artı</th>
@@ -169,6 +185,7 @@
                 <table class="w-full text-left border-collapse min-w-[500px]" id="behTable">
                     <thead>
                         <tr id="behHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3 border-b font-semibold w-20">No</th>
                             <th class="p-3 border-b font-semibold">Öğrenci</th>
                             <th class="p-3 border-b font-semibold text-center">Net Puan</th>
                             <th class="p-3 border-b font-semibold text-center">Toplam</th>
@@ -203,6 +220,7 @@
                 <table class="w-full text-left border-collapse min-w-[500px]" id="starTable">
                     <thead>
                         <tr id="starHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3 border-b font-semibold w-20">No</th>
                             <th class="p-3 border-b font-semibold">Öğrenci</th>
                             <th class="p-3 border-b font-semibold text-center">Puan</th>
                             <th class="p-3 border-b font-semibold text-center">Yıldız</th>
@@ -248,9 +266,10 @@
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse min-w-[450px]" id="summaryTable">
+                <table class="w-full text-left border-collapse min-w-[500px]" id="summaryTable">
                     <thead>
                         <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3 border-b font-semibold w-20">No</th>
                             <th class="p-3 border-b font-semibold">Öğrenci</th>
                             <th class="p-3 border-b font-semibold text-center">Ödev</th>
                             <th class="p-3 border-b font-semibold text-center">Süreç</th>
@@ -287,12 +306,18 @@
         };
 
         function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v25');
+            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v26');
             if (savedData) {
                 try {
                     const parsed = JSON.parse(savedData);
                     if (parsed && parsed.classes && parsed.currentClass) {
                         appState = parsed;
+                        // Eski verilerde no alanı yoksa ekle
+                        Object.keys(appState.classes).forEach(clsKey => {
+                            appState.classes[clsKey].students.forEach((st, i) => {
+                                if (st.no === undefined) st.no = String(i + 1);
+                            });
+                        });
                     }
                 } catch (e) {
                     console.error("Local storage parse error:", e);
@@ -308,7 +333,7 @@
         }
 
         function saveToLocal() {
-            localStorage.setItem('classroom_tracker_local_multiclass_v25', JSON.stringify(appState));
+            localStorage.setItem('classroom_tracker_local_multiclass_v26', JSON.stringify(appState));
         }
 
         function updateClassSelector() {
@@ -423,6 +448,71 @@
             }
         }
 
+        // --- EXCEL'DEN ÖĞRENCİ AKTARMA (IMPORT) ---
+        window.importStudentsFromExcel = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+
+                    const current = appState.classes[appState.currentClass];
+                    let addedCount = 0;
+
+                    json.forEach((row, idx) => {
+                        // Başlık satırını atla (İçinde 'ad', 'numara', 'no' geçiyorsa)
+                        if (idx === 0 && row.some(cell => String(cell).toLowerCase().includes('ad') || String(cell).toLowerCase().includes('no'))) {
+                            return;
+                        }
+                        if (row && row.length >= 2) {
+                            let no = String(row[0] || '').trim();
+                            let name = String(row[1] || '').trim();
+
+                            // Eğer sadece 1 sütun doldurulmuşsa ad olarak al, no'yu otomatik ver
+                            if (!name && no) {
+                                name = no;
+                                no = String(current.students.length + addedCount + 1);
+                            }
+
+                            if (name) {
+                                let initialHw = current.homeworks.map(() => ({ plus: 0, bonus: false, sacrificed: false }));
+                                let initialBeh = new Array(current.behaviors.length).fill(0);
+                                let initialStar = new Array(current.starQuestions.length).fill(0);
+
+                                current.students.push({
+                                    no: no || String(current.students.length + 1),
+                                    name: name,
+                                    hwScores: initialHw,
+                                    behScores: initialBeh,
+                                    starScores: initialStar
+                                });
+                                addedCount++;
+                            }
+                        }
+                    });
+
+                    event.target.value = ''; // Sıfırla
+                    if (addedCount > 0) {
+                        saveToLocal();
+                        renderUI();
+                        alert(`${addedCount} öğrenci başarıyla eklendi!`);
+                    } else {
+                        alert("Dosyadan uygun öğrenci verisi okunamadı. Lütfen ilk sütun No, ikinci sütun Ad Soyad olacak şekilde kontrol edin.");
+                    }
+                } catch (err) {
+                    console.error("Excel import error:", err);
+                    alert("Excel dosyası okunurken bir hata oluştu.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
         // --- EXCEL EXPORT HELPER ---
         window.exportTableToExcel = function(tableId, filename) {
             let table = document.getElementById(tableId);
@@ -458,32 +548,43 @@
         }
 
         window.addStudent = function() {
-            const input = document.getElementById('newStudentName');
-            const name = input.value.trim();
+            const noInput = document.getElementById('newStudentNo');
+            const nameInput = document.getElementById('newStudentName');
+            let no = noInput.value.trim();
+            const name = nameInput.value.trim();
             if (!name) return;
 
             const current = appState.classes[appState.currentClass];
+            if (!no) {
+                no = String(current.students.length + 1);
+            }
+
             let initialHw = current.homeworks.map(() => ({ plus: 0, bonus: false, sacrificed: false }));
             let initialBeh = new Array(current.behaviors.length).fill(0);
             let initialStar = new Array(current.starQuestions.length).fill(0);
 
             current.students.push({
+                no: no,
                 name: name,
                 hwScores: initialHw,
                 behScores: initialBeh,
                 starScores: initialStar
             });
-            input.value = '';
+            noInput.value = '';
+            nameInput.value = '';
             saveToLocal();
             renderUI();
         }
 
-        window.editStudentName = function(stIndex) {
+        window.editStudent = function(stIndex) {
             const current = appState.classes[appState.currentClass];
-            const currentName = current.students[stIndex].name;
-            const newName = prompt("Öğrenci Adını Düzenle:", currentName);
+            const st = current.students[stIndex];
+            const newNo = prompt("Öğrenci Numarasını Düzenle:", st.no || "");
+            if (newNo === null) return;
+            const newName = prompt("Öğrenci Adını Düzenle:", st.name);
             if (newName !== null && newName.trim() !== "") {
-                current.students[stIndex].name = newName.trim();
+                st.no = newNo.trim();
+                st.name = newName.trim();
                 saveToLocal();
                 renderUI();
             }
@@ -505,7 +606,6 @@
             renderUI();
         }
 
-        // Ödev Silme (Onay mekanizmalı)
         window.deleteHomework = function(hwIndex) {
             const current = appState.classes[appState.currentClass];
             const hwName = current.homeworks[hwIndex];
@@ -534,7 +634,6 @@
             renderUI();
         }
 
-        // Süreç Kriteri Silme (Onay mekanizmalı)
         window.deleteBehavior = function(behIndex) {
             const current = appState.classes[appState.currentClass];
             const behName = current.behaviors[behIndex];
@@ -566,7 +665,6 @@
             renderUI();
         }
 
-        // Yıldızlı Soru Silme (Onay mekanizmalı)
         window.deleteStarQuestion = function(starIndex) {
             const current = appState.classes[appState.currentClass];
             const starName = current.starQuestions[starIndex];
@@ -780,16 +878,17 @@
             clsBody.innerHTML = '';
             
             if (current.students.length === 0) {
-                clsBody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400 font-medium">Bu sınıfta henüz öğrenci yok.</td></tr>`;
+                clsBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">Bu sınıfta henüz öğrenci yok.</td></tr>`;
             } else {
                 current.students.forEach((st, idx) => {
                     let tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/80 transition-colors";
                     tr.innerHTML = `
                         <td class="p-3 border-b text-center font-bold text-slate-400">${idx + 1}</td>
+                        <td class="p-3 border-b font-semibold text-slate-600">${st.no || '-'}</td>
                         <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
                         <td class="p-3 border-b text-center space-x-1.5 no-print">
-                            <button onclick="editStudentName(${idx})" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-lg font-semibold">Düzenle</button>
+                            <button onclick="editStudent(${idx})" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-lg font-semibold">Düzenle</button>
                             <button onclick="deleteStudent(${idx})" class="text-[11px] bg-rose-50 hover:bg-rose-100 text-rose-600 px-2 py-1 rounded-lg font-semibold">Sil</button>
                         </td>
                     `;
@@ -797,9 +896,10 @@
                 });
             }
 
-            // 2. Render Homework Tab Dynamic Table (Header with Delete Buttons)
+            // 2. Render Homework Tab Dynamic Table
             const hwHeaderRow = document.getElementById('hwHeaderRow');
             hwHeaderRow.innerHTML = `
+                <th class="p-3 border-b font-semibold w-20">No</th>
                 <th class="p-3 border-b font-semibold">Öğrenci</th>
                 <th class="p-3 border-b font-semibold text-center">Puan</th>
                 <th class="p-3 border-b font-semibold text-center">Artı</th>
@@ -830,6 +930,7 @@
                 tr.className = "hover:bg-slate-50/80";
                 
                 let html = `
+                    <td class="p-3 border-b font-semibold text-slate-600">${st.no || '-'}</td>
                     <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
                     <td class="p-3 border-b text-center font-bold text-emerald-600">${hwScore.toFixed(1)}</td>
                     <td class="p-3 border-b text-center font-extrabold text-blue-600">${totalPlus}</td>
@@ -859,9 +960,10 @@
                 hwBody.appendChild(tr);
             });
 
-            // 3. Render Behavior Tab Dynamic Table (Header with Delete Buttons)
+            // 3. Render Behavior Tab Dynamic Table
             const behHeaderRow = document.getElementById('behHeaderRow');
             behHeaderRow.innerHTML = `
+                <th class="p-3 border-b font-semibold w-20">No</th>
                 <th class="p-3 border-b font-semibold">Öğrenci</th>
                 <th class="p-3 border-b font-semibold text-center">Net Puan</th>
                 <th class="p-3 border-b font-semibold text-center">Toplam</th>
@@ -890,6 +992,7 @@
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80";
                 let html = `
+                    <td class="p-3 border-b font-semibold text-slate-600">${st.no || '-'}</td>
                     <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
                     <td class="p-3 border-b font-semibold text-center text-emerald-600">${curveBehScores[stIdx].toFixed(1)}</td>
                     <td class="p-3 border-b text-center">
@@ -915,9 +1018,10 @@
                 behBody.appendChild(tr);
             });
 
-            // 4. Render Star Questions Tab Dynamic Table (Header with Delete Buttons)
+            // 4. Render Star Questions Tab Dynamic Table
             const starHeaderRow = document.getElementById('starHeaderRow');
             starHeaderRow.innerHTML = `
+                <th class="p-3 border-b font-semibold w-20">No</th>
                 <th class="p-3 border-b font-semibold">Öğrenci</th>
                 <th class="p-3 border-b font-semibold text-center">Puan</th>
                 <th class="p-3 border-b font-semibold text-center">Yıldız</th>
@@ -944,6 +1048,7 @@
                 tr.className = "hover:bg-slate-50/80";
                 
                 let html = `
+                    <td class="p-3 border-b font-semibold text-slate-600">${st.no || '-'}</td>
                     <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
                     <td class="p-3 border-b font-semibold text-center text-emerald-600">${finalStarScore.toFixed(1)}</td>
                     <td class="p-3 border-b font-semibold text-center text-amber-600">${totalStar}</td>
@@ -990,6 +1095,7 @@
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80";
                 tr.innerHTML = `
+                    <td class="p-3 border-b font-semibold text-slate-600">${st.no || '-'}</td>
                     <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
                     <td class="p-3 border-b font-semibold text-center text-blue-600">${hwScore.toFixed(1)}</td>
                     <td class="p-3 border-b font-semibold text-center text-emerald-600">${behScore.toFixed(1)}</td>
