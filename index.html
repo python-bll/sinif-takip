@@ -3,92 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulut Destekli Sınıf Takip ve Ağırlıklandırma Paneli</title>
-    <!-- Tailwind CSS for modern responsive styling -->
+    <title>Sınıf Takip & Ağırlıklandırma Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS (Excel dışa aktarım için) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            body * { visibility: hidden; }
+            .tab-content:not(.hidden), .tab-content:not(.hidden) table, .tab-content:not(.hidden) th, .tab-content:not(.hidden) td, .tab-content:not(.hidden) tr { visibility: visible !important; }
+            .tab-content:not(.hidden) { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+            /* PDF ve Yazdırmada butonları gizle, sayı değerlerini görünür kıl */
+            td button { display: none !important; }
+            td span.pdf-val { display: inline-block !important; font-weight: bold; }
+        }
+        span.pdf-val { display: none; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
+<body class="bg-slate-100 min-h-screen py-8 px-4">
 
-    <!-- PASSWORD MODAL -->
-    <div id="passwordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full border border-slate-100 space-y-6">
-            <div class="text-center space-y-2">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">🔒</div>
-                <h2 class="text-xl font-black text-slate-900">Bulut Bağlantı Şifresi</h2>
-                <p class="text-xs text-slate-500">Sınıf paneline erişmek ve bulut verilerini senkronize etmek için lütfen şifreyi girin.</p>
-            </div>
-            <div class="space-y-3">
-                <input type="password" id="cloudPasswordInput" placeholder="Şifrenizi girin..." class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                <button onclick="verifyPassword()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-md transition-all">Bağlan ve Giriş Yap</button>
-                <p id="passwordError" class="text-xs text-rose-600 text-center font-medium hidden">Hatalı şifre! Lütfen tekrar deneyin.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
         
-        <!-- Header & Status -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-4">
+        <!-- Header & Class Selector Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-4 no-print">
             <div>
                 <h1 class="text-2xl font-black text-slate-900 tracking-tight">Sınıf Takip & Ağırlıklandırma Paneli</h1>
-                <p class="text-xs text-slate-500 mt-1">Bulut Senkronizasyonu Aktif • Tüm cihazlarınızda anlık güncellenir</p>
+                <p class="text-xs text-slate-500 mt-1">Yerel Mod (Veriler tarayıcınızda güvenle saklanır)</p>
             </div>
-            <div class="flex items-center gap-3">
-                <div id="connectionStatus" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                    Buluta bağlanılıyor...
+            
+            <!-- Class Selection & Management -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                    <label class="text-xs font-bold text-slate-600 whitespace-nowrap">Aktif Sınıf:</label>
+                    <select id="classSelector" onchange="changeClass(this.value)" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- Dynamic classes -->
+                    </select>
                 </div>
-                <button onclick="retryConnection()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold transition-all">Yeniden Bağlan</button>
+                <div class="flex gap-1">
+                    <input type="text" id="newClassName" placeholder="Yeni Sınıf Adı" class="w-32 px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="addClass()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all whitespace-nowrap">+ Sınıf Ekle</button>
+                </div>
             </div>
         </div>
         
-        <!-- Navigation Tabs -->
-        <div class="flex flex-wrap gap-2 mb-6 border-b pb-4">
-            <button onclick="switchTab('homework')" id="btn-homework" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200">Ödevler</button>
-            <button onclick="switchTab('behavior')" id="btn-behavior" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Sınıf İçi / Diğer Durumlar</button>
-            <button onclick="switchTab('summary')" id="btn-summary" class="tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Genel Özet & Ağırlık</button>
+        <!-- NAVIGATION TABS & BACKUP BUTTONS -->
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-6 border-b pb-4 no-print">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="switchTab('classes')" id="btn-classes" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200">Sınıflar</button>
+                <button onclick="switchTab('homework')" id="btn-homework" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Ödevler</button>
+                <button onclick="switchTab('behavior')" id="btn-behavior" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Süreç (Sınıf İçi)</button>
+                <button onclick="switchTab('star')" id="btn-star" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Yıldızlı Sorular</button>
+                <button onclick="switchTab('summary')" id="btn-summary" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Genel Özet & Ağırlıklar</button>
+            </div>
+            <!-- Backup & Export buttons -->
+            <div class="flex gap-2">
+                <button onclick="exportData()" title="Verileri JSON olarak yedekle" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">💾 Yedek İndir</button>
+                <label title="Yedek dosyadan geri yükle" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5">
+                    📂 Yedeği Yükle
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
+                </label>
+            </div>
+        </div>
+
+        <!-- CLASSES TAB -->
+        <div id="tab-classes" class="tab-content space-y-6">
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center justify-between no-print">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base" id="currentClassNameDisplay">Aktif Sınıf: 5-A</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Bu sınıftaki öğrencileri listeleyebilir, düzenleyebilir veya yeni öğrenci ekleyebilirsiniz.</p>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 sm:w-72 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button onclick="addStudent()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Öğrenci Ekle</button>
+                </div>
+            </div>
+
+            <!-- Tablo İçi Dışa Aktarım Butonları -->
+            <div class="flex justify-end gap-2 no-print">
+                <button onclick="exportTableToExcel('classesTable', 'Sinif_Genel_Liste')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse" id="classesTable">
+                    <thead>
+                        <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3.5 border-b font-semibold w-16 text-center">#</th>
+                            <th class="p-3.5 border-b font-semibold">Öğrenci Adı Soyadı</th>
+                            <th class="p-3.5 border-b font-semibold text-center no-print">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classesStudentBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic student list -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- HOMEWORK TAB -->
-        <div id="tab-homework" class="tab-content space-y-6">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center">
-                <input type="text" id="hwNameInput" placeholder="Yeni Ödev Adı (Örn: Ödev 1 - Matematik)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                <button onclick="addHomework()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">+ Ödev Ekle</button>
+        <div id="tab-homework" class="tab-content hidden space-y-6">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center justify-between no-print">
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <input type="text" id="hwNameInput" placeholder="Yeni Ödev Adı (Örn: Ödev 1)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button onclick="addHomework()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Ödev Ekle</button>
+                </div>
+                <div class="text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
+                    ℹ️ Bonus kazanılan ödevlerde isterseniz <b>"Feda Et"</b> diyerek süreçteki 1 eksiği sildirebilir ve artı kazanabilirsiniz.
+                </div>
             </div>
+
+            <!-- Tablo İçi Dışa Aktarım Butonları -->
+            <div class="flex justify-end gap-2 no-print">
+                <button onclick="exportTableToExcel('hwTable', 'Odev_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+            </div>
+
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
                 <table class="w-full text-left border-collapse" id="hwTable">
                     <thead>
                         <tr id="hwHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
                             <th class="p-3.5 border-b font-semibold">Öğrenci</th>
                             <th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Toplam Artı (+)</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Bonus / Ödev Sayısı</th>
                         </tr>
                     </thead>
                     <tbody id="hwBody" class="divide-y divide-slate-200 text-sm">
-                        <!-- Dynamic student homework scores -->
+                        <!-- Dynamic homework rows -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- BEHAVIOR TAB -->
+        <!-- BEHAVIOR (SÜREÇ) TAB -->
         <div id="tab-behavior" class="tab-content hidden space-y-6">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center">
-                <input type="text" id="behNameInput" placeholder="Yeni Kriter Adı (Örn: Derse Katılım)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 flex flex-col md:flex-row gap-4 items-center justify-between no-print">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm">Süreç (Sınıf İçi) Çan Eğrisi Aralık Ayarları</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Süreç puanları çan eğrisi formülüyle belirleyeceğiniz min-max aralığına dönüştürülür.</p>
+                </div>
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="flex items-center gap-1.5">
+                        <label class="text-xs font-semibold text-slate-600">Min:</label>
+                        <input type="number" id="curveMinInput" value="50" onchange="updateCurveSettings()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <label class="text-xs font-semibold text-slate-600">Max:</label>
+                        <input type="number" id="curveMaxInput" value="100" onchange="updateCurveSettings()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center no-print">
+                <input type="text" id="behNameInput" placeholder="Yeni Süreç Kriteri (Örn: Derse Katılım)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 <button onclick="addBehavior()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">+ Kriter Ekle</button>
             </div>
+
+            <!-- Tablo İçi Dışa Aktarım Butonları -->
+            <div class="flex justify-end gap-2 no-print">
+                <button onclick="exportTableToExcel('behTable', 'Surec_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+            </div>
+
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
                 <table class="w-full text-left border-collapse" id="behTable">
                     <thead>
                         <tr id="behHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
                             <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Toplam Durum Puanı</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Net Süreç Puanı</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Toplam Artı / Puan</th>
                         </tr>
                     </thead>
                     <tbody id="behBody" class="divide-y divide-slate-200 text-sm">
-                        <!-- Dynamic student behavior scores -->
+                        <!-- Dynamic behavior rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- STAR QUESTIONS TAB -->
+        <div id="tab-star" class="tab-content hidden space-y-6">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center justify-between no-print">
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <input type="text" id="starNameInput" placeholder="Yeni Yıldızlı Soru / Aktivite" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button onclick="addStarQuestion()" class="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Yıldızlı Soru Ekle</button>
+                </div>
+                <div class="text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
+                    ℹ️ Sınıftaki en çok yıldıza sahip öğrenci 100 alır. Diğerleri karekök formülüyle orantılanır.
+                </div>
+            </div>
+
+            <!-- Tablo İçi Dışa Aktarım Butonları -->
+            <div class="flex justify-end gap-2 no-print">
+                <button onclick="exportTableToExcel('starTable', 'Yildizli_Sorular_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse" id="starTable">
+                    <thead>
+                        <tr id="starHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Dönüştürülmüş Puan</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Toplam Yıldız</th>
+                        </tr>
+                    </thead>
+                    <tbody id="starBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic star rows -->
                     </tbody>
                 </table>
             </div>
@@ -96,29 +217,44 @@
 
         <!-- SUMMARY & WEIGHTS TAB -->
         <div id="tab-summary" class="tab-content hidden space-y-6">
-            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 flex flex-col md:flex-row gap-6 items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-sm">Oransal Etki Dağılımı</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Toplam ağırlık yüzdeleri genel başarı puanını doğrudan etkiler.</p>
-                </div>
-                <div class="flex items-center gap-4 w-full md:w-auto">
-                    <div class="flex items-center gap-2">
-                        <label class="text-xs font-semibold text-slate-600">Ödevler (%):</label>
-                        <input type="number" id="hwWeightInput" value="50" onchange="updateWeights()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 space-y-4 no-print">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">Dinamik Etki Oranları (Yüzdeler)</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Toplam ağırlık yüzdelerini dilediğiniz gibi ayarlayabilirsiniz. (Yıldızlı soru yoksa otomatik olarak ödev ve süreç arasında paylaştırılır)</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-xs font-semibold text-slate-600">Kriterler (%):</label>
-                        <input type="number" id="behWeightInput" value="50" onchange="updateWeights()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="weightTotalWarning" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800">Toplam: %100</div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
+                        <label class="text-xs font-bold text-slate-700">Ödevler Ağırlığı (%):</label>
+                        <input type="number" id="hwWeightInput" value="40" onchange="updateWeights()" class="w-20 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
+                        <label class="text-xs font-bold text-slate-700">Süreç Ağırlığı (%):</label>
+                        <input type="number" id="behWeightInput" value="40" onchange="updateWeights()" class="w-20 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
+                        <label class="text-xs font-bold text-slate-700">Yıldızlı Soru Ağırlığı (%):</label>
+                        <input type="number" id="starWeightInput" value="20" onchange="updateWeights()" class="w-20 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
+
+            <!-- Tablo İçi Dışa Aktarım Butonları -->
+            <div class="flex justify-end gap-2 no-print">
+                <button onclick="exportTableToExcel('summaryTable', 'Genel_Ozet_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+            </div>
+
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
                 <table class="w-full text-left border-collapse" id="summaryTable">
                     <thead>
                         <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
                             <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Ödev Ortalaması</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Durum Ortalaması</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Ödev (Log 100lük)</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Süreç (Çan Eğrisi)</th>
+                            <th class="p-3.5 border-b font-semibold text-center">Yıldızlı (Karekök)</th>
                             <th class="p-3.5 border-b font-semibold text-center">Genel Başarı Puanı</th>
                         </tr>
                     </thead>
@@ -129,136 +265,172 @@
             </div>
         </div>
 
-        <!-- GLOBAL STUDENT MANAGEMENT -->
-        <div class="mt-8 pt-6 border-t border-slate-200 bg-slate-50/50 p-5 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <div class="w-full sm:w-auto">
-                <h3 class="font-bold text-slate-800 text-sm">Yeni Öğrenci Kaydı</h3>
-                <p class="text-xs text-slate-500">Sınıfa yeni bir öğrenci ekleyin.</p>
-            </div>
-            <div class="flex gap-2 w-full sm:w-auto">
-                <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 sm:w-72 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                <button onclick="addStudent()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Öğrenci Ekle</button>
-            </div>
-        </div>
-
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'classroom-tracker-default';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDummyKeyForFallbackOnly",
-            authDomain: "dummy.firebaseapp.com",
-            projectId: "dummy-project"
-        };
-
-        const CLOUD_PASSWORD = "123"; // İstediğiniz şifreyi buradan değiştirebilirsiniz
-
-        let app, db, auth;
-        let isCloudReady = false;
-
-        // In-memory application state
+    <script>
+        // Application State
         let appState = {
-            students: [],
-            homeworks: ["Ödev 1"],
-            behaviors: ["Derse Katılım"],
-            hwWeight: 50,
-            behWeight: 50
-        };
-
-        let docRefPath;
-
-        window.verifyPassword = function() {
-            const inputVal = document.getElementById('cloudPasswordInput').value;
-            const errorEl = document.getElementById('passwordError');
-
-            if (inputVal === CLOUD_PASSWORD) {
-                document.getElementById('passwordModal').classList.add('hidden');
-                initFirebase();
-            } else {
-                errorEl.classList.remove('hidden');
-            }
-        };
-
-        async function initFirebase() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                docRefPath = doc(db, 'artifacts', appId, 'publicData', 'classroomState');
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+            classes: {
+                "5-A": {
+                    students: [],
+                    homeworks: ["Ödev 1"],
+                    behaviors: ["Derse Katılım"],
+                    starQuestions: ["Yıldızlı Soru 1"],
+                    hwWeight: 40,
+                    behWeight: 40,
+                    starWeight: 20,
+                    curveMin: 50,
+                    curveMax: 100
                 }
+            },
+            currentClass: "5-A"
+        };
 
-                // Real-time listener for multi-device sync
-                onSnapshot(docRefPath, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        appState.students = data.students || [];
-                        appState.homeworks = data.homeworks || ["Ödev 1"];
-                        appState.behaviors = data.behaviors || ["Derse Katılım"];
-                        appState.hwWeight = data.hwWeight !== undefined ? data.hwWeight : 50;
-                        appState.behWeight = data.behWeight !== undefined ? data.behWeight : 50;
-
-                        document.getElementById('hwWeightInput').value = appState.hwWeight;
-                        document.getElementById('behWeightInput').value = appState.behWeight;
-
-                        renderUI();
-                    } else {
-                        saveToCloud(); // Save initial state if empty
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v22');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed && parsed.classes && parsed.currentClass) {
+                        appState = parsed;
                     }
-                    setConnectionStatus(true);
-                }, (error) => {
-                    console.error("Firestore sync error:", error);
-                    setConnectionStatus(false);
-                });
+                } catch (e) {
+                    console.error("Local storage parse error:", e);
+                }
+            }
+            if (!appState.classes[appState.currentClass]) {
+                const keys = Object.keys(appState.classes);
+                appState.currentClass = keys.length > 0 ? keys[0] : "5-A";
+            }
+            updateClassSelector();
+            loadClassSettings();
+            renderUI();
+        }
 
-                isCloudReady = true;
-            } catch (err) {
-                console.error("Firebase initialization failed:", err);
-                setConnectionStatus(false);
+        function saveToLocal() {
+            localStorage.setItem('classroom_tracker_local_multiclass_v22', JSON.stringify(appState));
+        }
+
+        function updateClassSelector() {
+            const selector = document.getElementById('classSelector');
+            selector.innerHTML = '';
+            Object.keys(appState.classes).forEach(clsName => {
+                let opt = document.createElement('option');
+                opt.value = clsName;
+                opt.textContent = clsName;
+                if (clsName === appState.currentClass) opt.selected = true;
+                selector.appendChild(opt);
+            });
+            document.getElementById('currentClassNameDisplay').textContent = `Aktif Sınıf: ${appState.currentClass}`;
+        }
+
+        window.addClass = function() {
+            const input = document.getElementById('newClassName');
+            const name = input.value.trim();
+            if (!name) return;
+
+            if (appState.classes[name]) {
+                alert("Bu isimde bir sınıf zaten var!");
+                return;
+            }
+
+            appState.classes[name] = {
+                students: [],
+                homeworks: ["Ödev 1"],
+                behaviors: ["Derse Katılım"],
+                starQuestions: ["Yıldızlı Soru 1"],
+                hwWeight: 40,
+                behWeight: 40,
+                starWeight: 20,
+                curveMin: 50,
+                curveMax: 100
+            };
+            appState.currentClass = name;
+            input.value = '';
+            saveToLocal();
+            updateClassSelector();
+            loadClassSettings();
+            renderUI();
+        }
+
+        window.changeClass = function(className) {
+            appState.currentClass = className;
+            loadClassSettings();
+            renderUI();
+        }
+
+        function loadClassSettings() {
+            const current = appState.classes[appState.currentClass];
+            if (current) {
+                document.getElementById('hwWeightInput').value = current.hwWeight !== undefined ? current.hwWeight : 40;
+                document.getElementById('behWeightInput').value = current.behWeight !== undefined ? current.behWeight : 40;
+                document.getElementById('starWeightInput').value = current.starWeight !== undefined ? current.starWeight : 20;
+                document.getElementById('curveMinInput').value = current.curveMin !== undefined ? current.curveMin : 50;
+                document.getElementById('curveMaxInput').value = current.curveMax !== undefined ? current.curveMax : 100;
+            }
+            document.getElementById('currentClassNameDisplay').textContent = `Aktif Sınıf: ${appState.currentClass}`;
+        }
+
+        window.exportData = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "sinif_takip_yedek_" + new Date().toISOString().slice(0, 10) + ".json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        window.importData = function(event) {
+            const fileReader = new FileReader();
+            if (event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0], "UTF-8");
+                fileReader.onload = function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (parsed && parsed.classes) {
+                            appState = parsed;
+                            saveToLocal();
+                            updateClassSelector();
+                            loadClassSettings();
+                            renderUI();
+                            alert("Yedek başarıyla yüklendi!");
+                        } else {
+                            alert("Geçersiz yedek dosyası formatı!");
+                        }
+                    } catch (error) {
+                        console.error("Import error:", error);
+                        alert("Dosya okunamadı veya bozuk.");
+                    }
+                };
             }
         }
 
-        async function saveToCloud() {
-            // Always save to local storage as safety backup
-            localStorage.setItem('classroom_tracker_local', JSON.stringify(appState));
+        // --- EXCEL EXPORT HELPER ---
+        window.exportTableToExcel = function(tableId, filename) {
+            let table = document.getElementById(tableId);
+            if (!table) return;
+            let cloneTable = table.cloneNode(true);
+            
+            cloneTable.querySelectorAll('button, input').forEach(el => el.remove());
+            cloneTable.querySelectorAll('td').forEach(td => {
+                let printSpan = td.querySelector('.pdf-val');
+                if (printSpan) {
+                    td.textContent = printSpan.textContent;
+                }
+            });
 
-            if (!isCloudReady || !docRefPath) return;
-            try {
-                await setDoc(docRefPath, appState);
-                setConnectionStatus(true);
-            } catch (err) {
-                console.error("Error saving data to cloud:", err);
-                setConnectionStatus(false);
-            }
-        }
-
-        function setConnectionStatus(connected) {
-            const el = document.getElementById('connectionStatus');
-            if (connected) {
-                el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200";
-                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Bulut Senkronize';
-            } else {
-                el.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200";
-                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span> Yerel Mod (Çevrimdışı)';
-            }
+            let wb = XLSX.utils.table_to_book(cloneTable, {sheet: "Rapor"});
+            XLSX.writeFile(wb, `${appState.currentClass}_${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.className = "tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200";
+                el.className = "tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200";
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
-            document.getElementById(`btn-${tab}`).className = "tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200";
+            document.getElementById(`btn-${tab}`).className = "tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200";
         }
 
         window.addStudent = function() {
@@ -266,14 +438,31 @@
             const name = input.value.trim();
             if (!name) return;
 
-            appState.students.push({
+            const current = appState.classes[appState.currentClass];
+            let initialHw = current.homeworks.map(() => ({ plus: 0, bonus: false, sacrificed: false }));
+            let initialBeh = new Array(current.behaviors.length).fill(0);
+            let initialStar = new Array(current.starQuestions.length).fill(0);
+
+            current.students.push({
                 name: name,
-                hwScores: new Array(appState.homeworks.length).fill(0),
-                behScores: new Array(appState.behaviors.length).fill(0)
+                hwScores: initialHw,
+                behScores: initialBeh,
+                starScores: initialStar
             });
             input.value = '';
-            saveToCloud();
+            saveToLocal();
             renderUI();
+        }
+
+        window.editStudentName = function(stIndex) {
+            const current = appState.classes[appState.currentClass];
+            const currentName = current.students[stIndex].name;
+            const newName = prompt("Öğrenci Adını Düzenle:", currentName);
+            if (newName !== null && newName.trim() !== "") {
+                current.students[stIndex].name = newName.trim();
+                saveToLocal();
+                renderUI();
+            }
         }
 
         window.addHomework = function() {
@@ -281,10 +470,14 @@
             const name = input.value.trim();
             if (!name) return;
 
-            appState.homeworks.push(name);
-            appState.students.forEach(st => st.hwScores.push(0));
+            const current = appState.classes[appState.currentClass];
+            current.homeworks.push(name);
+            current.students.forEach(st => {
+                if(!st.hwScores) st.hwScores = [];
+                st.hwScores.push({ plus: 0, bonus: false, sacrificed: false });
+            });
             input.value = '';
-            saveToCloud();
+            saveToLocal();
             renderUI();
         }
 
@@ -293,146 +486,436 @@
             const name = input.value.trim();
             if (!name) return;
 
-            appState.behaviors.push(name);
-            appState.students.forEach(st => st.behScores.push(0));
+            const current = appState.classes[appState.currentClass];
+            current.behaviors.push(name);
+            current.students.forEach(st => st.behScores.push(0));
             input.value = '';
-            saveToCloud();
+            saveToLocal();
             renderUI();
         }
 
-        window.updateHwScore = function(stIndex, hwIndex, val) {
-            appState.students[stIndex].hwScores[hwIndex] += val;
-            saveToCloud();
+        window.addStarQuestion = function() {
+            const input = document.getElementById('starNameInput');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const current = appState.classes[appState.currentClass];
+            current.starQuestions.push(name);
+            current.students.forEach(st => {
+                if(!st.starScores) st.starScores = new Array(current.starQuestions.length - 1).fill(0);
+                st.starScores.push(0);
+            });
+            input.value = '';
+            saveToLocal();
+            renderUI();
+        }
+
+        window.updateHwPlus = function(stIndex, hwIndex, val) {
+            const current = appState.classes[appState.currentClass];
+            let st = current.students[stIndex];
+            let currPlus = st.hwScores[hwIndex].plus + val;
+            if (currPlus < 0) currPlus = 0;
+            if (currPlus > 4) currPlus = 4;
+            st.hwScores[hwIndex].plus = currPlus;
+            saveToLocal();
+            renderUI();
+        }
+
+        window.toggleHwBonus = function(stIndex, hwIndex) {
+            const current = appState.classes[appState.currentClass];
+            let st = current.students[stIndex];
+            st.hwScores[hwIndex].bonus = !st.hwScores[hwIndex].bonus;
+            if(!st.hwScores[hwIndex].bonus) {
+                st.hwScores[hwIndex].sacrificed = false;
+            }
+            saveToLocal();
+            renderUI();
+        }
+
+        window.toggleBonusSacrifice = function(stIndex, hwIndex) {
+            const current = appState.classes[appState.currentClass];
+            let st = current.students[stIndex];
+            if (!st.hwScores[hwIndex].bonus) {
+                alert("Önce bu ödevde bonus aktif olmalıdır!");
+                return;
+            }
+            st.hwScores[hwIndex].sacrificed = !st.hwScores[hwIndex].sacrificed;
+            saveToLocal();
             renderUI();
         }
 
         window.updateBehScore = function(stIndex, behIndex, val) {
-            appState.students[stIndex].behScores[behIndex] += val;
-            saveToCloud();
+            const current = appState.classes[appState.currentClass];
+            current.students[stIndex].behScores[behIndex] += val;
+            saveToLocal();
+            renderUI();
+        }
+
+        window.updateStarScore = function(stIndex, starIndex, val) {
+            const current = appState.classes[appState.currentClass];
+            let st = current.students[stIndex];
+            if(!st.starScores) st.starScores = new Array(current.starQuestions.length).fill(0);
+            let s = st.starScores[starIndex] + val;
+            if (s < 0) s = 0;
+            st.starScores[starIndex] = s;
+            saveToLocal();
             renderUI();
         }
 
         window.deleteStudent = function(stIndex) {
-            appState.students.splice(stIndex, 1);
-            saveToCloud();
-            renderUI();
+            const current = appState.classes[appState.currentClass];
+            if (confirm("Bu öğrenciyi silmek istediğinize emin misiniz?")) {
+                current.students.splice(stIndex, 1);
+                saveToLocal();
+                renderUI();
+            }
         }
 
         window.updateWeights = function() {
-            appState.hwWeight = parseFloat(document.getElementById('hwWeightInput').value) || 0;
-            appState.behWeight = parseFloat(document.getElementById('behWeightInput').value) || 0;
-            saveToCloud();
+            const current = appState.classes[appState.currentClass];
+            current.hwWeight = parseFloat(document.getElementById('hwWeightInput').value) || 0;
+            current.behWeight = parseFloat(document.getElementById('behWeightInput').value) || 0;
+            current.starWeight = parseFloat(document.getElementById('starWeightInput').value) || 0;
+            
+            let total = current.hwWeight + current.behWeight + current.starWeight;
+            const warningEl = document.getElementById('weightTotalWarning');
+            warningEl.textContent = `Toplam: %${total}`;
+            if(total !== 100) {
+                warningEl.className = "text-xs font-bold px-3 py-1.5 rounded-lg bg-rose-100 text-rose-800";
+            } else {
+                warningEl.className = "text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800";
+            }
+
+            saveToLocal();
             renderUI();
         }
 
+        window.updateCurveSettings = function() {
+            const current = appState.classes[appState.currentClass];
+            current.curveMin = parseFloat(document.getElementById('curveMinInput').value) || 50;
+            current.curveMax = parseFloat(document.getElementById('curveMaxInput').value) || 100;
+            saveToLocal();
+            renderUI();
+        }
+
+        // --- CALCULATION HELPERS ---
+        function getTotalPlusCount(hwScores) {
+            if (!hwScores) return 0;
+            return hwScores.reduce((sum, hw) => {
+                let b = (hw.bonus && !hw.sacrificed) ? 4 : 0;
+                return sum + (hw.plus || 0) + b;
+            }, 0);
+        }
+
+        function getBonusCount(hwScores) {
+            if (!hwScores) return 0;
+            return hwScores.filter(hw => hw.bonus).length;
+        }
+
+        function getMaxRawPlusInClass(students) {
+            if (!students || students.length === 0) return 0;
+            let max = 0;
+            students.forEach(st => {
+                let total = getTotalPlusCount(st.hwScores);
+                if (total > max) max = total;
+            });
+            return max;
+        }
+
+        function calculateLogarithmicHw(st, students) {
+            let totalRaw = getTotalPlusCount(st.hwScores);
+            let maxInClass = getMaxRawPlusInClass(students);
+
+            if (maxInClass === 0 || totalRaw === 0) return 0;
+            if (totalRaw >= maxInClass) return 100;
+
+            let score = (Math.log10(totalRaw + 1) / Math.log10(maxInClass + 1)) * 100;
+            return Math.min(100, Math.max(0, score));
+        }
+
+        function getTotalStarCount(starScores) {
+            if (!starScores) return 0;
+            return starScores.reduce((a, b) => a + (b || 0), 0);
+        }
+
+        function getMaxStarInClass(students) {
+            if (!students || students.length === 0) return 0;
+            let max = 0;
+            students.forEach(st => {
+                let total = getTotalStarCount(st.starScores);
+                if (total > max) max = total;
+            });
+            return max;
+        }
+
+        function calculateSqrtStar(st, students) {
+            if(!st.starScores || st.starScores.length === 0) return 0;
+            let total = getTotalStarCount(st.starScores);
+            let maxStarInClass = getMaxStarInClass(students);
+
+            if (maxStarInClass === 0 || total === 0) return 0;
+            if (total >= maxStarInClass) return 100;
+
+            let score = (Math.sqrt(total) / Math.sqrt(maxStarInClass)) * 100;
+            return Math.min(100, Math.max(0, score));
+        }
+
+        function getSacrificedBonusCount(st) {
+            let count = 0;
+            if (st.hwScores) {
+                st.hwScores.forEach(hw => {
+                    if (hw.bonus && hw.sacrificed) count++;
+                });
+            }
+            return count;
+        }
+
+        function getAdjustedBehaviorScores(students) {
+            return students.map(st => {
+                let totalBeh = (st.behScores || []).reduce((a, b) => a + b, 0);
+                let sacrificedCount = getSacrificedBonusCount(st);
+                return totalBeh + sacrificedCount;
+            });
+        }
+
+        function calculateCurveBehaviors(students, curveMin, curveMax) {
+            let adjustedScores = getAdjustedBehaviorScores(students);
+            if(adjustedScores.length === 0) return students.map(() => 0);
+
+            let min = Math.min(...adjustedScores);
+            let max = Math.max(...adjustedScores);
+
+            if (min === max) {
+                return students.map(() => (curveMin + curveMax) / 2);
+            }
+
+            return adjustedScores.map(score => {
+                let normalized = (score - min) / (max - min);
+                return curveMin + normalized * (curveMax - curveMin);
+            });
+        }
+
+        // --- RENDER UI FUNCTION ---
         function renderUI() {
-            renderHomeworkTable();
-            renderBehaviorTable();
-            renderSummaryTable();
-        }
+            const current = appState.classes[appState.currentClass];
+            if (!current) return;
 
-        function renderHomeworkTable() {
-            const headerRow = document.getElementById('hwHeaderRow');
-            let headerHtml = '<th class="p-3.5 border-b font-semibold">Öğrenci</th>';
-            appState.homeworks.forEach((hw, idx) => {
-                headerHtml += `<th class="p-3.5 border-b font-semibold text-center">${hw}</th>`;
-            });
-            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>';
-            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">İşlem</th>';
-            headerRow.innerHTML = headerHtml;
+            let curveBehScores = calculateCurveBehaviors(current.students, current.curveMin, current.curveMax);
+            let adjustedBehScoresList = getAdjustedBehaviorScores(current.students);
 
-            const tbody = document.getElementById('hwBody');
-            tbody.innerHTML = '';
-
-            appState.students.forEach((st, sIdx) => {
-                let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
-                let rowHtml = `<td class="p-3.5 border-b font-bold text-slate-900">${st.name}</td>`;
-                let totalHw = 0;
-
-                st.hwScores.forEach((score, hIdx) => {
-                    totalHw += score;
-                    rowHtml += `<td class="p-3.5 border-b text-center">
-                        <div class="inline-flex items-center gap-2 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
-                            <span class="font-bold text-slate-700 w-6 text-center">${score}</span>
-                            <div class="flex flex-col gap-0.5">
-                                <button onclick="updateHwScore(${sIdx}, ${hIdx}, 1)" class="w-5 h-5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">+</button>
-                                <button onclick="updateHwScore(${sIdx}, ${hIdx}, -1)" class="w-5 h-5 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">-</button>
-                            </div>
-                        </div>
-                    </td>`;
+            // 1. Render Classes Student Tab (Sadece Öğrenci Bilgileri)
+            const clsBody = document.getElementById('classesStudentBody');
+            clsBody.innerHTML = '';
+            
+            if (current.students.length === 0) {
+                clsBody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400 font-medium">Bu sınıfta henüz öğrenci yok. Yukarıdan öğrenci ekleyebilirsiniz.</td></tr>`;
+            } else {
+                current.students.forEach((st, idx) => {
+                    let tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50/80 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-3.5 border-b text-center font-bold text-slate-400">${idx + 1}</td>
+                        <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
+                        <td class="p-3.5 border-b text-center space-x-2 no-print">
+                            <button onclick="editStudentName(${idx})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">Düzenle</button>
+                            <button onclick="deleteStudent(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg font-semibold">Sil</button>
+                        </td>
+                    `;
+                    clsBody.appendChild(tr);
                 });
+            }
 
-                rowHtml += `<td class="p-3.5 border-b text-center font-black text-blue-600 text-base">${totalHw}</td>`;
-                rowHtml += `<td class="p-3.5 border-b text-center"><button onclick="deleteStudent(${sIdx})" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-lg transition-colors">Sil</button></td>`;
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
+            // 2. Render Homework Tab Dynamic Table
+            const hwHeaderRow = document.getElementById('hwHeaderRow');
+            hwHeaderRow.innerHTML = `
+                <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                <th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>
+                <th class="p-3.5 border-b font-semibold text-center">Toplam Artı (+)</th>
+                <th class="p-3.5 border-b font-semibold text-center">Bonus / Ödev Sayısı</th>
+            `;
+            current.homeworks.forEach((hwName) => {
+                let th = document.createElement('th');
+                th.className = "p-3.5 border-b font-semibold text-center";
+                th.textContent = hwName;
+                hwHeaderRow.appendChild(th);
             });
-        }
 
-        function renderBehaviorTable() {
-            const headerRow = document.getElementById('behHeaderRow');
-            let headerHtml = '<th class="p-3.5 border-b font-semibold">Öğrenci</th>';
-            appState.behaviors.forEach((beh) => {
-                headerHtml += `<th class="p-3.5 border-b font-semibold text-center">${beh}</th>`;
-            });
-            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">Toplam Durum Puanı</th>';
-            headerHtml += '<th class="p-3.5 border-b font-semibold text-center">İşlem</th>';
-            headerRow.innerHTML = headerHtml;
-
-            const tbody = document.getElementById('behBody');
-            tbody.innerHTML = '';
-
-            appState.students.forEach((st, sIdx) => {
-                let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
-                let rowHtml = `<td class="p-3.5 border-b font-bold text-slate-900">${st.name}</td>`;
-                let totalBeh = 0;
-
-                st.behScores.forEach((score, bIdx) => {
-                    totalBeh += score;
-                    rowHtml += `<td class="p-3.5 border-b text-center">
-                        <div class="inline-flex items-center gap-2 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
-                            <span class="font-bold text-slate-700 w-6 text-center">${score}</span>
-                            <div class="flex flex-col gap-0.5">
-                                <button onclick="updateBehScore(${sIdx}, ${bIdx}, 1)" class="w-5 h-5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">+</button>
-                                <button onclick="updateBehScore(${sIdx}, ${bIdx}, -1)" class="w-5 h-5 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-md leading-none flex items-center justify-center transition-colors">-</button>
-                            </div>
-                        </div>
-                    </td>`;
-                });
-
-                rowHtml += `<td class="p-3.5 border-b text-center font-black text-blue-600 text-base">${totalBeh}</td>`;
-                rowHtml += `<td class="p-3.5 border-b text-center"><button onclick="deleteStudent(${sIdx})" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-lg transition-colors">Sil</button></td>`;
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderSummaryTable() {
-            const tbody = document.getElementById('summaryBody');
-            tbody.innerHTML = '';
-
-            const hwW = appState.hwWeight / 100;
-            const behW = appState.behWeight / 100;
-
-            appState.students.forEach(st => {
-                let avgHw = st.hwScores.length > 0 ? st.hwScores.reduce((a, b) => a + b, 0) / st.hwScores.length : 0;
-                let avgBeh = st.behScores.length > 0 ? st.behScores.reduce((a, b) => a + b, 0) / st.behScores.length : 0;
-                let finalScore = (avgHw * hwW) + (avgBeh * behW);
+            const hwBody = document.getElementById('hwBody');
+            hwBody.innerHTML = '';
+            current.students.forEach((st, stIdx) => {
+                if(!st.hwScores) st.hwScores = current.homeworks.map(() => ({ plus: 0, bonus: false, sacrificed: false }));
+                let totalPlus = getTotalPlusCount(st.hwScores);
+                let hwScore = calculateLogarithmicHw(st, current.students);
+                let bonusCount = getBonusCount(st.hwScores);
+                let totalHwCount = current.homeworks.length;
 
                 let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-3.5 border-b font-bold text-slate-900">${st.name}</td>
-                    <td class="p-3.5 border-b text-center text-slate-700">${avgHw.toFixed(2)}</td>
-                    <td class="p-3.5 border-b text-center text-slate-700">${avgBeh.toFixed(2)}</td>
-                    <td class="p-3.5 border-b text-center font-black text-emerald-600 text-lg">${finalScore.toFixed(2)}</td>
+                tr.className = "hover:bg-slate-50/80";
+                
+                let html = `
+                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3.5 border-b text-center font-bold text-emerald-600">${hwScore.toFixed(1)}</td>
+                    <td class="p-3.5 border-b text-center font-extrabold text-blue-600">${totalPlus}</td>
+                    <td class="p-3.5 border-b text-center font-bold text-amber-600">${bonusCount} / ${totalHwCount}</td>
                 `;
-                tbody.appendChild(tr);
+
+                st.hwScores.forEach((hw, hwIdx) => {
+                    let isBonusActive = hw.bonus;
+                    let isSacrificed = hw.sacrificed;
+                    let bonusTitle = isSacrificed ? 'Feda Edildi (Süreçle Takas Edildi)' : 'Bonus (+4 Ekler)';
+                    let displayVal = `${hw.plus}${isBonusActive && !isSacrificed ? ' (+B)' : ''}${isSacrificed ? ' (Feda)' : ''}`;
+
+                    html += `
+                        <td class="p-3.5 border-b text-center">
+                            <span class="pdf-val">${displayVal}</span>
+                            <div class="flex items-center justify-center gap-1.5 flex-wrap no-print">
+                                <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">-</button>
+                                <span class="w-6 text-center font-bold text-xs">${hw.plus}</span>
+                                <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">+</button>
+                                <button onclick="toggleHwBonus(${stIdx}, ${hwIdx})" class="px-2 py-0.5 rounded font-bold text-xs ${isBonusActive && !isSacrificed ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}" title="${bonusTitle}">★</button>
+                                ${isBonusActive ? `<button onclick="toggleBonusSacrifice(${stIdx},${hwIdx})" class="text-[10px] px-1.5 py-0.5 rounded font-bold ${isSacrificed ? 'bg-slate-700 text-white line-through' : 'bg-slate-200 text-slate-600 hover:bg-purple-100'}" title="Süreçle takas et">${isSacrificed ? 'İptal' : 'Feda Et'}</button>` : ''}
+                            </div>
+                        </td>
+                    `;
+                });
+
+                tr.innerHTML = html;
+                hwBody.appendChild(tr);
+            });
+
+            // 3. Render Behavior Tab Dynamic Table
+            const behHeaderRow = document.getElementById('behHeaderRow');
+            behHeaderRow.innerHTML = `
+                <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                <th class="p-3.5 border-b font-semibold text-center">Net Süreç Puanı</th>
+                <th class="p-3.5 border-b font-semibold text-center">Toplam Artı / Puan (Düzeltilmiş)</th>
+            `;
+            current.behaviors.forEach(behName => {
+                let th = document.createElement('th');
+                th.className = "p-3.5 border-b font-semibold text-center";
+                th.textContent = behName;
+                behHeaderRow.appendChild(th);
+            });
+
+            const behBody = document.getElementById('behBody');
+            behBody.innerHTML = '';
+            current.students.forEach((st, stIdx) => {
+                let adjustedTotalBeh = adjustedBehScoresList[stIdx];
+                let sacrificedCount = getSacrificedBonusCount(st);
+                let sacrificedInfoText = sacrificedCount > 0 
+                    ? `<div class="text-[10px] text-purple-700 font-bold">(${sacrificedCount} Bonus Feda Edildi)</div>` 
+                    : '';
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80";
+                let html = `
+                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3.5 border-b font-semibold text-center text-emerald-600">${curveBehScores[stIdx].toFixed(1)}</td>
+                    <td class="p-3.5 border-b text-center">
+                        <div class="font-bold text-blue-600">${adjustedTotalBeh}</div>
+                        ${sacrificedInfoText}
+                    </td>
+                `;
+
+                st.behScores.forEach((bScore, bIdx) => {
+                    html += `
+                        <td class="p-3.5 border-b text-center">
+                            <span class="pdf-val">${bScore}</span>
+                            <div class="flex items-center justify-center gap-1.5 no-print mt-1">
+                                <button onclick="updateBehScore(${stIdx}, ${bIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">-</button>
+                                <span class="w-8 text-center font-bold text-xs">${bScore}</span>
+                                <button onclick="updateBehScore(${stIdx}, ${bIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">+</button>
+                            </div>
+                        </td>
+                    `;
+                });
+
+                tr.innerHTML = html;
+                behBody.appendChild(tr);
+            });
+
+            // 4. Render Star Questions Tab Dynamic Table
+            const starHeaderRow = document.getElementById('starHeaderRow');
+            starHeaderRow.innerHTML = `
+                <th class="p-3.5 border-b font-semibold">Öğrenci</th>
+                <th class="p-3.5 border-b font-semibold text-center">Dönüştürülmüş Puan</th>
+                <th class="p-3.5 border-b font-semibold text-center">Toplam Yıldız</th>
+            `;
+            current.starQuestions.forEach(sqName => {
+                let th = document.createElement('th');
+                th.className = "p-3.5 border-b font-semibold text-center";
+                th.textContent = sqName;
+                starHeaderRow.appendChild(th);
+            });
+
+            const starBody = document.getElementById('starBody');
+            starBody.innerHTML = '';
+            current.students.forEach((st, stIdx) => {
+                let totalStar = getTotalStarCount(st.starScores);
+                let finalStarScore = calculateSqrtStar(st, current.students);
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80";
+                
+                let html = `
+                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3.5 border-b font-semibold text-center text-emerald-600">${finalStarScore.toFixed(1)}</td>
+                    <td class="p-3.5 border-b font-semibold text-center text-amber-600">${totalStar}</td>
+                `;
+
+                if(!st.starScores) st.starScores = new Array(current.starQuestions.length).fill(0);
+
+                current.starQuestions.forEach((sq, sqIdx) => {
+                    let sVal = st.starScores[sqIdx] || 0;
+                    html += `
+                        <td class="p-3.5 border-b text-center">
+                            <span class="pdf-val">${sVal}</span>
+                            <div class="flex items-center justify-center gap-1.5 no-print mt-1">
+                                <button onclick="updateStarScore(${stIdx}, ${sqIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">-</button>
+                                <span class="w-8 text-center font-bold text-xs">${sVal}</span>
+                                <button onclick="updateStarScore(${stIdx}, ${sqIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">+</button>
+                            </div>
+                        </td>
+                    `;
+                });
+
+                tr.innerHTML = html;
+                starBody.appendChild(tr);
+            });
+
+            // 5. Render Summary Tab Table
+            const summaryBody = document.getElementById('summaryBody');
+            summaryBody.innerHTML = '';
+            current.students.forEach((st, stIdx) => {
+                let hwScore = calculateLogarithmicHw(st, current.students);
+                let behScore = curveBehScores[stIdx];
+                let starScore = calculateSqrtStar(st, current.students);
+
+                let hwW = current.hwWeight;
+                let behW = current.behWeight;
+                let starW = current.starWeight;
+
+                let generalScore = 0;
+                let totalW = hwW + behW + starW;
+                if (totalW > 0) {
+                    generalScore = (hwScore * (hwW / totalW)) + (behScore * (behW / totalW)) + (starScore * (starW / totalW));
+                }
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80";
+                tr.innerHTML = `
+                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3.5 border-b font-semibold text-center text-blue-600">${hwScore.toFixed(1)}</td>
+                    <td class="p-3.5 border-b font-semibold text-center text-emerald-600">${behScore.toFixed(1)}</td>
+                    <td class="p-3.5 border-b font-semibold text-center text-amber-600">${starScore.toFixed(1)}</td>
+                    <td class="p-3.5 border-b font-black text-center text-slate-900 bg-slate-50/50">${generalScore.toFixed(1)}</td>
+                `;
+                summaryBody.appendChild(tr);
             });
         }
-    </script>
 
+        // Initialize application on load
+        window.onload = loadFromLocalStorage;
+    </script>
 </body>
 </html>
