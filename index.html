@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Özel Sınıf Takip ve Ağırlıklandırma Paneli</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { font-size: 20px; margin-bottom: 10px; }
+        .section { margin-bottom: 20px; padding: 15px; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; }
+        input, button { padding: 8px; margin: 5px 0; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background: #eee; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sınıf Takip ve Ağırlıklandırma Paneli</h1>
+    
+    <div class="section">
+        <h3>1. Kriterleri ve Etki Oranlarını Belirle (Toplam %100 olmalı)</h3>
+        <div id="criteria-inputs">
+            <div>Kriter 1: <input type="text" id="cName1" value="Ödev"> Ağırlık (%): <input type="number" id="cWeight1" value="40" style="width:60px;"></div>
+            <div>Kriter 2: <input type="text" id="cName2" value="Katılım"> Ağırlık (%): <input type="number" id="cWeight2" value="30" style="width:60px;"></div>
+            <div>Kriter 3: <input type="text" id="cName3" value="Davranış"> Ağırlık (%): <input type="number" id="cWeight3" value="30" style="width:60px;"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>2. Öğrenci Ekle</h3>
+        <input type="text" id="studentName" placeholder="Öğrenci Adı Soyadı">
+        <button onclick="addStudent()">Öğrenci Ekle</button>
+    </div>
+
+    <div class="section">
+        <h3>3. Sınıf Tablosu ve Puanlama</h3>
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Öğrenci</th>
+                    <th id="th1">Ödev</th>
+                    <th id="th2">Katılım</th>
+                    <th id="th3">Davranış</th>
+                    <th>Genel Başarı Puanı</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamik dolacak -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let students = [];
+
+    function addStudent() {
+        const nameInput = document.getElementById('studentName');
+        if(!nameInput.value) return;
+        
+        students.push({
+            name: nameInput.value,
+            scores: [0, 0, 0] // 3 kriter için puanlar
+        });
+        nameInput.value = '';
+        renderTable();
+    }
+
+    function updateScore(index, criteriaIndex, change) {
+        students[index].scores[criteriaIndex] += change;
+        renderTable();
+    }
+
+    function deleteStudent(index) {
+        students.splice(index, 1);
+        renderTable();
+    }
+
+    function renderTable() {
+        // Başlıkları güncelle
+        document.getElementById('th1').innerText = document.getElementById('cName1').value;
+        document.getElementById('th2').innerText = document.getElementById('cName2').value;
+        document.getElementById('th3').innerText = document.getElementById('cName3').value;
+
+        const w1 = parseFloat(document.getElementById('cWeight1').value) || 0;
+        const w2 = parseFloat(document.getElementById('cWeight2').value) || 0;
+        const w3 = parseFloat(document.getElementById('cWeight3').value) || 0;
+
+        const tbody = document.getElementById('studentTable').querySelector('tbody');
+        tbody.innerHTML = '';
+
+        students.forEach((st, idx) => {
+            // Oransal hesaplama mantığı
+            let totalScore = (st.scores[0] * (w1 / 100)) + (st.scores[1] * (w2 / 100)) + (st.scores[2] * (w3 / 100));
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${st.name}</b></td>
+                <td>
+                    ${st.scores[0]} 
+                    <button onclick="updateScore(${idx}, 0, 1)">+</button>
+                    <button onclick="updateScore(${idx}, 0, -1)">-</button>
+                </td>
+                <td>
+                    ${st.scores[1]} 
+                    <button onclick="updateScore(${idx}, 1, 1)">+</button>
+                    <button onclick="updateScore(${idx}, 1, -1)">-</button>
+                </td>
+                <td>
+                    ${st.scores[2]} 
+                    <button onclick="updateScore(${idx}, 2, 1)">+</button>
+                    <button onclick="updateScore(${idx}, 2, -1)">-</button>
+                </td>
+                <td><b>${totalScore.toFixed(2)}</b></td>
+                <td><button class="btn-danger" onclick="deleteStudent(${idx})">Sil</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+</script>
+
+</body>
+</html>
