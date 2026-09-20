@@ -8,7 +8,7 @@
         .container { max-width: 1100px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1 { font-size: 20px; margin-bottom: 10px; }
         .section { margin-bottom: 20px; padding: 15px; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; }
-        input, button { padding: 8px; margin: 5px 0; font-size: 14px; }
+        input, button, textarea { padding: 8px; margin: 5px 0; font-size: 14px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; overflow-x: auto; display: block; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; white-space: nowrap; }
         th { background: #eee; }
@@ -18,6 +18,8 @@
         .btn-danger:hover { background: #c82333; }
         .btn-success { background: #28a745; }
         .btn-success:hover { background: #218838; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn { padding: 10px 20px; background: #ddd; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .tab-btn.active { background: #007bff; color: white; }
@@ -105,6 +107,17 @@
         <input type="text" id="studentName" placeholder="Öğrenci Adı Soyadı">
         <button onclick="addStudent()">Öğrenciyi Kaydet</button>
     </div>
+
+    <!-- VERİ TAŞIMA / YEDEKLEME ALANI -->
+    <div class="section" style="margin-top: 20px; background: #fff3cd; border-color: #ffeeba;">
+        <h3>Cihazlar Arası Veri Senkronizasyonu (Yedekleme)</h3>
+        <p style="font-size: 13px; color: #856404;">Başka bir cihaza (telefona vb.) geçerken verilerini aktarmak için aşağıdaki butona basıp kodu kopyala ve diğer cihazda kutucuğa yapıştır.</p>
+        <button class="btn-warning" onclick="exportData()">Veri Kodunu Kopyala</button>
+        <br><br>
+        <textarea id="dataCodeInput" placeholder="Başka cihazdan aldığın kodu buraya yapıştır..." style="width: 100%; height: 60px;"></textarea>
+        <br>
+        <button class="btn-success" onclick="importData()">Kodu Yapıştır ve Verileri Yükle</button>
+    </div>
 </div>
 
 <script>
@@ -112,7 +125,6 @@
     let homeworks = JSON.parse(localStorage.getItem('tracker_homeworks')) || ["Ödev 1"];
     let behaviors = JSON.parse(localStorage.getItem('tracker_behaviors')) || ["Derse Katılım"];
 
-    // Ağırlıkları yükle
     window.onload = function() {
         if(localStorage.getItem('tracker_hwWeight')) document.getElementById('hwWeight').value = localStorage.getItem('tracker_hwWeight');
         if(localStorage.getItem('tracker_behWeight')) document.getElementById('behWeight').value = localStorage.getItem('tracker_behWeight');
@@ -125,6 +137,48 @@
         localStorage.setItem('tracker_behaviors', JSON.stringify(behaviors));
         localStorage.setItem('tracker_hwWeight', document.getElementById('hwWeight').value);
         localStorage.setItem('tracker_behWeight', document.getElementById('behWeight').value);
+    }
+
+    function exportData() {
+        const allData = {
+            students: students,
+            homeworks: homeworks,
+            behaviors: behaviors,
+            hwWeight: document.getElementById('hwWeight').value,
+            behWeight: document.getElementById('behWeight').value
+        };
+        const jsonString = JSON.stringify(allData);
+        navigator.clipboard.writeText(jsonString).then(() => {
+            alert("Veri kodu panoya kopyalandı! Diğer cihazda ilgili kutucuğa yapıştırabilirsin.");
+        }).catch(err => {
+            prompt("Kopyalanamadı, bu metni kopyalayın:", jsonString);
+        });
+    }
+
+    function importData() {
+        const code = document.getElementById('dataCodeInput').value.trim();
+        if(!code) {
+            alert("Lütfen geçerli bir veri kodu yapıştırın!");
+            return;
+        }
+        try {
+            const parsed = JSON.parse(code);
+            if(parsed.students && parsed.homeworks && parsed.behaviors) {
+                students = parsed.students;
+                homeworks = parsed.homeworks;
+                behaviors = parsed.behaviors;
+                if(parsed.hwWeight) document.getElementById('hwWeight').value = parsed.hwWeight;
+                if(parsed.behWeight) document.getElementById('behWeight').value = parsed.behWeight;
+                saveData();
+                renderAll();
+                alert("Veriler başarıyla yüklendi ve güncellendi!");
+                document.getElementById('dataCodeInput').value = '';
+            } else {
+                alert("Geçersiz veri formatı!");
+            }
+        } catch(e) {
+            alert("Hatalı kod! Kodun tamamını doğru kopyaladığınızdan emin olun.");
+        }
     }
 
     function switchTab(tabName, evt) {
