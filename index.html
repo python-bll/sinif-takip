@@ -39,8 +39,9 @@
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="newClassName" placeholder="Yeni Sınıf Adı" class="flex-1 sm:w-32 px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="addClass()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all whitespace-nowrap">+ Sınıf Ekle</button>
+                    <input type="text" id="newClassName" placeholder="Yeni Sınıf Adı" class="flex-1 sm:w-28 px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="addClass()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all whitespace-nowrap">+ Ekle</button>
+                    <button onclick="deleteCurrentClass()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold rounded-xl text-xs transition-all whitespace-nowrap" title="Aktif Sınıfı Sil">🗑️ Sınıfı Sil</button>
                 </div>
             </div>
         </div>
@@ -79,8 +80,8 @@
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('classesTable', 'Sinif_Genel_Liste')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
+                <button onclick="exportTableToExcel('classesTable', 'Sinif_Genel_Liste')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -113,8 +114,8 @@
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('hwTable', 'Odev_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
+                <button onclick="exportTableToExcel('hwTable', 'Odev_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -160,8 +161,8 @@
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('behTable', 'Surec_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
+                <button onclick="exportTableToExcel('behTable', 'Surec_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -194,8 +195,8 @@
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('starTable', 'Yildizli_Sorular_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
+                <button onclick="exportTableToExcel('starTable', 'Yildizli_Sorular_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -242,8 +243,8 @@
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('summaryTable', 'Genel_Ozet_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
+                <button onclick="exportTableToExcel('summaryTable', 'Genel_Ozet_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -286,7 +287,7 @@
         };
 
         function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v23');
+            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v25');
             if (savedData) {
                 try {
                     const parsed = JSON.parse(savedData);
@@ -307,7 +308,7 @@
         }
 
         function saveToLocal() {
-            localStorage.setItem('classroom_tracker_local_multiclass_v23', JSON.stringify(appState));
+            localStorage.setItem('classroom_tracker_local_multiclass_v25', JSON.stringify(appState));
         }
 
         function updateClassSelector() {
@@ -350,6 +351,23 @@
             updateClassSelector();
             loadClassSettings();
             renderUI();
+        }
+
+        window.deleteCurrentClass = function() {
+            const classKeys = Object.keys(appState.classes);
+            if (classKeys.length <= 1) {
+                alert("Sistemde en az bir sınıf kalmalıdır, son sınıf silinemez!");
+                return;
+            }
+            if (confirm(`"${appState.currentClass}" sınıfını ve içindeki tüm verileri silmek istediğinize emin misiniz?`)) {
+                delete appState.classes[appState.currentClass];
+                const remainingKeys = Object.keys(appState.classes);
+                appState.currentClass = remainingKeys[0];
+                saveToLocal();
+                updateClassSelector();
+                loadClassSettings();
+                renderUI();
+            }
         }
 
         window.changeClass = function(className) {
@@ -419,7 +437,14 @@
                 }
             });
 
-            let wb = XLSX.utils.table_to_book(cloneTable, {sheet: "Rapor"});
+            let headerRow = cloneTable.insertRow(0);
+            let cell = headerRow.insertCell(0);
+            cell.colSpan = cloneTable.rows[1] ? cloneTable.rows[1].cells.length : 3;
+            cell.textContent = `Sınıf: ${appState.currentClass} - Tarih: ${new Date().toLocaleDateString('tr-TR')}`;
+            cell.style.fontWeight = "bold";
+            cell.style.backgroundColor = "#e2e8f0";
+
+            let wb = XLSX.utils.table_to_book(cloneTable, {sheet: appState.currentClass});
             XLSX.writeFile(wb, `${appState.currentClass}_${filename}_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
 
@@ -480,6 +505,22 @@
             renderUI();
         }
 
+        // Ödev Silme (Onay mekanizmalı)
+        window.deleteHomework = function(hwIndex) {
+            const current = appState.classes[appState.currentClass];
+            const hwName = current.homeworks[hwIndex];
+            if (confirm(`"${hwName}" ödevini ve buna ait tüm öğrenci verilerini silmek istediğinize emin misiniz?`)) {
+                current.homeworks.splice(hwIndex, 1);
+                current.students.forEach(st => {
+                    if (st.hwScores) {
+                        st.hwScores.splice(hwIndex, 1);
+                    }
+                });
+                saveToLocal();
+                renderUI();
+            }
+        }
+
         window.addBehavior = function() {
             const input = document.getElementById('behNameInput');
             const name = input.value.trim();
@@ -491,6 +532,22 @@
             input.value = '';
             saveToLocal();
             renderUI();
+        }
+
+        // Süreç Kriteri Silme (Onay mekanizmalı)
+        window.deleteBehavior = function(behIndex) {
+            const current = appState.classes[appState.currentClass];
+            const behName = current.behaviors[behIndex];
+            if (confirm(`"${behName}" sürecini ve buna ait tüm öğrenci verilerini silmek istediğinize emin misiniz?`)) {
+                current.behaviors.splice(behIndex, 1);
+                current.students.forEach(st => {
+                    if (st.behScores) {
+                        st.behScores.splice(behIndex, 1);
+                    }
+                });
+                saveToLocal();
+                renderUI();
+            }
         }
 
         window.addStarQuestion = function() {
@@ -507,6 +564,22 @@
             input.value = '';
             saveToLocal();
             renderUI();
+        }
+
+        // Yıldızlı Soru Silme (Onay mekanizmalı)
+        window.deleteStarQuestion = function(starIndex) {
+            const current = appState.classes[appState.currentClass];
+            const starName = current.starQuestions[starIndex];
+            if (confirm(`"${starName}" yıldızlı sorusunu ve buna ait tüm öğrenci verilerini silmek istediğinize emin misiniz?`)) {
+                current.starQuestions.splice(starIndex, 1);
+                current.students.forEach(st => {
+                    if (st.starScores) {
+                        st.starScores.splice(starIndex, 1);
+                    }
+                });
+                saveToLocal();
+                renderUI();
+            }
         }
 
         window.updateHwPlus = function(stIndex, hwIndex, val) {
@@ -724,7 +797,7 @@
                 });
             }
 
-            // 2. Render Homework Tab Dynamic Table
+            // 2. Render Homework Tab Dynamic Table (Header with Delete Buttons)
             const hwHeaderRow = document.getElementById('hwHeaderRow');
             hwHeaderRow.innerHTML = `
                 <th class="p-3 border-b font-semibold">Öğrenci</th>
@@ -732,10 +805,15 @@
                 <th class="p-3 border-b font-semibold text-center">Artı</th>
                 <th class="p-3 border-b font-semibold text-center">Bonus</th>
             `;
-            current.homeworks.forEach((hwName) => {
+            current.homeworks.forEach((hwName, hwIdx) => {
                 let th = document.createElement('th');
                 th.className = "p-3 border-b font-semibold text-center";
-                th.textContent = hwName;
+                th.innerHTML = `
+                    <div class="flex items-center justify-center gap-1.5">
+                        <span>${hwName}</span>
+                        <button onclick="deleteHomework(${hwIdx})" class="text-rose-500 hover:text-rose-700 text-xs font-bold no-print p-0.5" title="Ödevi Sil">🗑️</button>
+                    </div>
+                `;
                 hwHeaderRow.appendChild(th);
             });
 
@@ -781,17 +859,22 @@
                 hwBody.appendChild(tr);
             });
 
-            // 3. Render Behavior Tab Dynamic Table
+            // 3. Render Behavior Tab Dynamic Table (Header with Delete Buttons)
             const behHeaderRow = document.getElementById('behHeaderRow');
             behHeaderRow.innerHTML = `
                 <th class="p-3 border-b font-semibold">Öğrenci</th>
                 <th class="p-3 border-b font-semibold text-center">Net Puan</th>
                 <th class="p-3 border-b font-semibold text-center">Toplam</th>
             `;
-            current.behaviors.forEach(behName => {
+            current.behaviors.forEach((behName, behIdx) => {
                 let th = document.createElement('th');
                 th.className = "p-3 border-b font-semibold text-center";
-                th.textContent = behName;
+                th.innerHTML = `
+                    <div class="flex items-center justify-center gap-1.5">
+                        <span>${behName}</span>
+                        <button onclick="deleteBehavior(${behIdx})" class="text-rose-500 hover:text-rose-700 text-xs font-bold no-print p-0.5" title="Süreci Sil">🗑️</button>
+                    </div>
+                `;
                 behHeaderRow.appendChild(th);
             });
 
@@ -832,17 +915,22 @@
                 behBody.appendChild(tr);
             });
 
-            // 4. Render Star Questions Tab Dynamic Table
+            // 4. Render Star Questions Tab Dynamic Table (Header with Delete Buttons)
             const starHeaderRow = document.getElementById('starHeaderRow');
             starHeaderRow.innerHTML = `
                 <th class="p-3 border-b font-semibold">Öğrenci</th>
                 <th class="p-3 border-b font-semibold text-center">Puan</th>
                 <th class="p-3 border-b font-semibold text-center">Yıldız</th>
             `;
-            current.starQuestions.forEach(sqName => {
+            current.starQuestions.forEach((sqName, starIdx) => {
                 let th = document.createElement('th');
                 th.className = "p-3 border-b font-semibold text-center";
-                th.textContent = sqName;
+                th.innerHTML = `
+                    <div class="flex items-center justify-center gap-1.5">
+                        <span>${sqName}</span>
+                        <button onclick="deleteStarQuestion(${starIdx})" class="text-rose-500 hover:text-rose-700 text-xs font-bold no-print p-0.5" title="Yıldızlı Soruyu Sil">🗑️</button>
+                    </div>
+                `;
                 starHeaderRow.appendChild(th);
             });
 
