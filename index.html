@@ -13,87 +13,86 @@
             .tab-content:not(.hidden), .tab-content:not(.hidden) table, .tab-content:not(.hidden) th, .tab-content:not(.hidden) td, .tab-content:not(.hidden) tr { visibility: visible !important; }
             .tab-content:not(.hidden) { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
-            /* PDF ve Yazdırmada butonları gizle, sayı değerlerini görünür kıl */
-            td button { display: none !important; }
-            td span.pdf-val { display: inline-block !important; font-weight: bold; }
+            button.no-print { display: none !important; }
+            span.pdf-val { display: inline-block !important; font-weight: bold; }
         }
         span.pdf-val { display: none; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen py-8 px-4">
+<body class="bg-slate-100 min-h-screen py-4 sm:py-8 px-2 sm:px-4">
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
+    <div class="max-w-7xl mx-auto bg-white p-3 sm:p-6 rounded-2xl shadow-xl border border-slate-100">
         
         <!-- Header & Class Selector Bar -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-4 no-print">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-4 sm:mb-6 gap-3 no-print">
             <div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Sınıf Takip & Ağırlıklandırma Paneli</h1>
-                <p class="text-xs text-slate-500 mt-1">Yerel Mod (Veriler tarayıcınızda güvenle saklanır)</p>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Sınıf Takip Paneli</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Yerel Mod (Veriler cihazınızda saklanır)</p>
             </div>
             
             <!-- Class Selection & Management -->
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+                <div class="flex items-center justify-between sm:justify-start gap-2 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200">
                     <label class="text-xs font-bold text-slate-600 whitespace-nowrap">Aktif Sınıf:</label>
                     <select id="classSelector" onchange="changeClass(this.value)" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <!-- Dynamic classes -->
                     </select>
                 </div>
-                <div class="flex gap-1">
-                    <input type="text" id="newClassName" placeholder="Yeni Sınıf Adı" class="w-32 px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="addClass()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all whitespace-nowrap">+ Sınıf Ekle</button>
+                <div class="flex gap-2">
+                    <input type="text" id="newClassName" placeholder="Yeni Sınıf Adı" class="flex-1 sm:w-32 px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="addClass()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all whitespace-nowrap">+ Sınıf Ekle</button>
                 </div>
             </div>
         </div>
         
         <!-- NAVIGATION TABS & BACKUP BUTTONS -->
-        <div class="flex flex-wrap justify-between items-center gap-2 mb-6 border-b pb-4 no-print">
-            <div class="flex flex-wrap gap-2">
-                <button onclick="switchTab('classes')" id="btn-classes" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200">Sınıflar</button>
-                <button onclick="switchTab('homework')" id="btn-homework" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Ödevler</button>
-                <button onclick="switchTab('behavior')" id="btn-behavior" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Süreç (Sınıf İçi)</button>
-                <button onclick="switchTab('star')" id="btn-star" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Yıldızlı Sorular</button>
-                <button onclick="switchTab('summary')" id="btn-summary" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200">Genel Özet & Ağırlıklar</button>
+        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-6 border-b pb-4 no-print">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+                <button onclick="switchTab('classes')" id="btn-classes" class="tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 text-white shadow-sm transition-all duration-200 whitespace-nowrap">Sınıflar</button>
+                <button onclick="switchTab('homework')" id="btn-homework" class="tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200 whitespace-nowrap">Ödevler</button>
+                <button onclick="switchTab('behavior')" id="btn-behavior" class="tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200 whitespace-nowrap">Süreç</button>
+                <button onclick="switchTab('star')" id="btn-star" class="tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200 whitespace-nowrap">Yıldızlı</button>
+                <button onclick="switchTab('summary')" id="btn-summary" class="tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200 whitespace-nowrap">Özet</button>
             </div>
             <!-- Backup & Export buttons -->
-            <div class="flex gap-2">
-                <button onclick="exportData()" title="Verileri JSON olarak yedekle" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">💾 Yedek İndir</button>
-                <label title="Yedek dosyadan geri yükle" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5">
-                    📂 Yedeği Yükle
+            <div class="flex gap-2 justify-end">
+                <button onclick="exportData()" title="Yedek İndir" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap">💾 Yedek İndir</button>
+                <label title="Yedeği Yükle" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap">
+                    📂 Yükle
                     <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
                 </label>
             </div>
         </div>
 
         <!-- CLASSES TAB -->
-        <div id="tab-classes" class="tab-content space-y-6">
-            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center justify-between no-print">
+        <div id="tab-classes" class="tab-content space-y-4">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between no-print">
                 <div>
-                    <h3 class="font-bold text-slate-800 text-base" id="currentClassNameDisplay">Aktif Sınıf: 5-A</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Bu sınıftaki öğrencileri listeleyebilir, düzenleyebilir veya yeni öğrenci ekleyebilirsiniz.</p>
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base" id="currentClassNameDisplay">Aktif Sınıf: 5-A</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Öğrenci ekleyin veya yönetin.</p>
                 </div>
-                <div class="flex gap-2 w-full sm:w-auto">
-                    <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 sm:w-72 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    <button onclick="addStudent()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Öğrenci Ekle</button>
+                <div class="flex gap-2">
+                    <input type="text" id="newStudentName" placeholder="Öğrenci Adı Soyadı" class="flex-1 sm:w-64 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                    <button onclick="addStudent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">+ Ekle</button>
                 </div>
             </div>
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('classesTable', 'Sinif_Genel_Liste')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+                <button onclick="exportTableToExcel('classesTable', 'Sinif_Genel_Liste')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse" id="classesTable">
+                <table class="w-full text-left border-collapse min-w-[300px]" id="classesTable">
                     <thead>
                         <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
-                            <th class="p-3.5 border-b font-semibold w-16 text-center">#</th>
-                            <th class="p-3.5 border-b font-semibold">Öğrenci Adı Soyadı</th>
-                            <th class="p-3.5 border-b font-semibold text-center no-print">İşlemler</th>
+                            <th class="p-3 border-b font-semibold w-12 text-center">#</th>
+                            <th class="p-3 border-b font-semibold">Öğrenci Adı Soyadı</th>
+                            <th class="p-3 border-b font-semibold text-center no-print">İşlemler</th>
                         </tr>
                     </thead>
-                    <tbody id="classesStudentBody" class="divide-y divide-slate-200 text-sm">
+                    <tbody id="classesStudentBody" class="divide-y divide-slate-200 text-xs sm:text-sm">
                         <!-- Dynamic student list -->
                     </tbody>
                 </table>
@@ -101,34 +100,34 @@
         </div>
 
         <!-- HOMEWORK TAB -->
-        <div id="tab-homework" class="tab-content hidden space-y-6">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center justify-between no-print">
-                <div class="flex gap-3 w-full sm:w-auto">
-                    <input type="text" id="hwNameInput" placeholder="Yeni Ödev Adı (Örn: Ödev 1)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    <button onclick="addHomework()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Ödev Ekle</button>
+        <div id="tab-homework" class="tab-content hidden space-y-4">
+            <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/60 flex flex-col gap-3 no-print">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="hwNameInput" placeholder="Yeni Ödev Adı (Örn: Ödev 1)" class="w-full sm:w-72 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                    <button onclick="addHomework()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">+ Ödev Ekle</button>
                 </div>
-                <div class="text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
-                    ℹ️ Bonus kazanılan ödevlerde isterseniz <b>"Feda Et"</b> diyerek süreçteki 1 eksiği sildirebilir ve artı kazanabilirsiniz.
+                <div class="text-[11px] sm:text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
+                    ℹ️ Bonus kazanılan ödevlerde <b>"Feda Et"</b> diyerek süreçteki 1 eksiği sildirebilirsiniz.
                 </div>
             </div>
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('hwTable', 'Odev_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+                <button onclick="exportTableToExcel('hwTable', 'Odev_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse" id="hwTable">
+                <table class="w-full text-left border-collapse min-w-[500px]" id="hwTable">
                     <thead>
                         <tr id="hwHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
-                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Toplam Artı (+)</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Bonus / Ödev Sayısı</th>
+                            <th class="p-3 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3 border-b font-semibold text-center">Puan</th>
+                            <th class="p-3 border-b font-semibold text-center">Artı</th>
+                            <th class="p-3 border-b font-semibold text-center">Bonus</th>
                         </tr>
                     </thead>
-                    <tbody id="hwBody" class="divide-y divide-slate-200 text-sm">
+                    <tbody id="hwBody" class="divide-y divide-slate-200 text-xs sm:text-sm">
                         <!-- Dynamic homework rows -->
                     </tbody>
                 </table>
@@ -136,45 +135,45 @@
         </div>
 
         <!-- BEHAVIOR (SÜREÇ) TAB -->
-        <div id="tab-behavior" class="tab-content hidden space-y-6">
-            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 flex flex-col md:flex-row gap-4 items-center justify-between no-print">
+        <div id="tab-behavior" class="tab-content hidden space-y-4">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between no-print">
                 <div>
-                    <h3 class="font-bold text-slate-800 text-sm">Süreç (Sınıf İçi) Çan Eğrisi Aralık Ayarları</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Süreç puanları çan eğrisi formülüyle belirleyeceğiniz min-max aralığına dönüştürülür.</p>
+                    <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Çan Eğrisi Aralık Ayarları</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Süreç puanı min-max aralığına dönüştürülür.</p>
                 </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1">
                         <label class="text-xs font-semibold text-slate-600">Min:</label>
-                        <input type="number" id="curveMinInput" value="50" onchange="updateCurveSettings()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="number" id="curveMinInput" value="50" onchange="updateCurveSettings()" class="w-16 px-2 py-1.5 bg-white border border-slate-300 rounded-xl text-center font-bold text-xs sm:text-sm">
                     </div>
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1">
                         <label class="text-xs font-semibold text-slate-600">Max:</label>
-                        <input type="number" id="curveMaxInput" value="100" onchange="updateCurveSettings()" class="w-20 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="number" id="curveMaxInput" value="100" onchange="updateCurveSettings()" class="w-16 px-2 py-1.5 bg-white border border-slate-300 rounded-xl text-center font-bold text-xs sm:text-sm">
                     </div>
                 </div>
             </div>
 
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center no-print">
-                <input type="text" id="behNameInput" placeholder="Yeni Süreç Kriteri (Örn: Derse Katılım)" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                <button onclick="addBehavior()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">+ Kriter Ekle</button>
+            <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-2 no-print">
+                <input type="text" id="behNameInput" placeholder="Yeni Süreç Kriteri (Örn: Derse Katılım)" class="w-full sm:w-72 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                <button onclick="addBehavior()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all">+ Kriter Ekle</button>
             </div>
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('behTable', 'Surec_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+                <button onclick="exportTableToExcel('behTable', 'Surec_Takip_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse" id="behTable">
+                <table class="w-full text-left border-collapse min-w-[500px]" id="behTable">
                     <thead>
                         <tr id="behHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
-                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Net Süreç Puanı</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Toplam Artı / Puan</th>
+                            <th class="p-3 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3 border-b font-semibold text-center">Net Puan</th>
+                            <th class="p-3 border-b font-semibold text-center">Toplam</th>
                         </tr>
                     </thead>
-                    <tbody id="behBody" class="divide-y divide-slate-200 text-sm">
+                    <tbody id="behBody" class="divide-y divide-slate-200 text-xs sm:text-sm">
                         <!-- Dynamic behavior rows -->
                     </tbody>
                 </table>
@@ -182,33 +181,33 @@
         </div>
 
         <!-- STAR QUESTIONS TAB -->
-        <div id="tab-star" class="tab-content hidden space-y-6">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row gap-3 items-center justify-between no-print">
-                <div class="flex gap-3 w-full sm:w-auto">
-                    <input type="text" id="starNameInput" placeholder="Yeni Yıldızlı Soru / Aktivite" class="w-full sm:w-80 px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    <button onclick="addStarQuestion()" class="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all whitespace-nowrap">+ Yıldızlı Soru Ekle</button>
+        <div id="tab-star" class="tab-content hidden space-y-4">
+            <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/60 flex flex-col gap-3 no-print">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="starNameInput" placeholder="Yeni Yıldızlı Soru / Aktivite" class="w-full sm:w-72 px-3.5 py-2 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                    <button onclick="addStarQuestion()" class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">+ Ekle</button>
                 </div>
-                <div class="text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
-                    ℹ️ Sınıftaki en çok yıldıza sahip öğrenci 100 alır. Diğerleri karekök formülüyle orantılanır.
+                <div class="text-[11px] sm:text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
+                    ℹ️ En çok yıldıza sahip öğrenci 100 alır, diğerleri karekök formülüyle oranlanır.
                 </div>
             </div>
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('starTable', 'Yildizli_Sorular_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+                <button onclick="exportTableToExcel('starTable', 'Yildizli_Sorular_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse" id="starTable">
+                <table class="w-full text-left border-collapse min-w-[500px]" id="starTable">
                     <thead>
                         <tr id="starHeaderRow" class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
-                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Dönüştürülmüş Puan</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Toplam Yıldız</th>
+                            <th class="p-3 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3 border-b font-semibold text-center">Puan</th>
+                            <th class="p-3 border-b font-semibold text-center">Yıldız</th>
                         </tr>
                     </thead>
-                    <tbody id="starBody" class="divide-y divide-slate-200 text-sm">
+                    <tbody id="starBody" class="divide-y divide-slate-200 text-xs sm:text-sm">
                         <!-- Dynamic star rows -->
                     </tbody>
                 </table>
@@ -216,49 +215,49 @@
         </div>
 
         <!-- SUMMARY & WEIGHTS TAB -->
-        <div id="tab-summary" class="tab-content hidden space-y-6">
-            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 space-y-4 no-print">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+        <div id="tab-summary" class="tab-content hidden space-y-4">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-3 no-print">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Dinamik Etki Oranları (Yüzdeler)</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Toplam ağırlık yüzdelerini dilediğiniz gibi ayarlayabilirsiniz. (Yıldızlı soru yoksa otomatik olarak ödev ve süreç arasında paylaştırılır)</p>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Etki Oranları (%)</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Toplam ağırlık yüzdelerini ayarlayın.</p>
                     </div>
                     <div id="weightTotalWarning" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800">Toplam: %100</div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
-                        <label class="text-xs font-bold text-slate-700">Ödevler Ağırlığı (%):</label>
-                        <input type="number" id="hwWeightInput" value="40" onchange="updateWeights()" class="w-20 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-blue-500">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
+                        <label class="text-xs font-bold text-slate-700">Ödev (%):</label>
+                        <input type="number" id="hwWeightInput" value="40" onchange="updateWeights()" class="w-16 px-2 py-1 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-xs sm:text-sm">
                     </div>
-                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
-                        <label class="text-xs font-bold text-slate-700">Süreç Ağırlığı (%):</label>
-                        <input type="number" id="behWeightInput" value="40" onchange="updateWeights()" class="w-20 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
+                        <label class="text-xs font-bold text-slate-700">Süreç (%):</label>
+                        <input type="number" id="behWeightInput" value="40" onchange="updateWeights()" class="w-16 px-2 py-1 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-xs sm:text-sm">
                     </div>
-                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
-                        <label class="text-xs font-bold text-slate-700">Yıldızlı Soru Ağırlığı (%):</label>
-                        <input type="number" id="starWeightInput" value="20" onchange="updateWeights()" class="w-20 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-sm focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
+                        <label class="text-xs font-bold text-slate-700">Yıldızlı (%):</label>
+                        <input type="number" id="starWeightInput" value="20" onchange="updateWeights()" class="w-16 px-2 py-1 bg-slate-50 border border-slate-300 rounded-lg text-center font-bold text-xs sm:text-sm">
                     </div>
                 </div>
             </div>
 
             <!-- Tablo İçi Dışa Aktarım Butonları -->
             <div class="flex justify-end gap-2 no-print">
-                <button onclick="exportTableToExcel('summaryTable', 'Genel_Ozet_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel İndir</button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF İndir / Yazdır</button>
+                <button onclick="exportTableToExcel('summaryTable', 'Genel_Ozet_Tablosu')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📊 Excel</button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1">📄 PDF</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left border-collapse" id="summaryTable">
+                <table class="w-full text-left border-collapse min-w-[450px]" id="summaryTable">
                     <thead>
                         <tr class="bg-slate-100/70 text-slate-700 text-xs uppercase tracking-wider">
-                            <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Ödev (Log 100lük)</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Süreç (Çan Eğrisi)</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Yıldızlı (Karekök)</th>
-                            <th class="p-3.5 border-b font-semibold text-center">Genel Başarı Puanı</th>
+                            <th class="p-3 border-b font-semibold">Öğrenci</th>
+                            <th class="p-3 border-b font-semibold text-center">Ödev</th>
+                            <th class="p-3 border-b font-semibold text-center">Süreç</th>
+                            <th class="p-3 border-b font-semibold text-center">Yıldız</th>
+                            <th class="p-3 border-b font-semibold text-center">Genel</th>
                         </tr>
                     </thead>
-                    <tbody id="summaryBody" class="divide-y divide-slate-200 text-sm">
+                    <tbody id="summaryBody" class="divide-y divide-slate-200 text-xs sm:text-sm">
                         <!-- Dynamic summary rows -->
                     </tbody>
                 </table>
@@ -287,7 +286,7 @@
         };
 
         function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v22');
+            const savedData = localStorage.getItem('classroom_tracker_local_multiclass_v23');
             if (savedData) {
                 try {
                     const parsed = JSON.parse(savedData);
@@ -308,7 +307,7 @@
         }
 
         function saveToLocal() {
-            localStorage.setItem('classroom_tracker_local_multiclass_v22', JSON.stringify(appState));
+            localStorage.setItem('classroom_tracker_local_multiclass_v23', JSON.stringify(appState));
         }
 
         function updateClassSelector() {
@@ -375,7 +374,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "sinif_takip_yedek_" + new Date().toISOString().slice(0, 10) + ".json");
+            downloadAnchor.setAttribute("download", `${appState.currentClass}_sinif_takip_yedek_` + new Date().toISOString().slice(0, 10) + ".json");
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -427,10 +426,10 @@
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.className = "tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200";
+                el.className = "tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200 whitespace-nowrap";
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
-            document.getElementById(`btn-${tab}`).className = "tab-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm transition-all duration-200";
+            document.getElementById(`btn-${tab}`).className = "tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 text-white shadow-sm transition-all duration-200 whitespace-nowrap";
         }
 
         window.addStudent = function() {
@@ -703,22 +702,22 @@
             let curveBehScores = calculateCurveBehaviors(current.students, current.curveMin, current.curveMax);
             let adjustedBehScoresList = getAdjustedBehaviorScores(current.students);
 
-            // 1. Render Classes Student Tab (Sadece Öğrenci Bilgileri)
+            // 1. Render Classes Student Tab
             const clsBody = document.getElementById('classesStudentBody');
             clsBody.innerHTML = '';
             
             if (current.students.length === 0) {
-                clsBody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400 font-medium">Bu sınıfta henüz öğrenci yok. Yukarıdan öğrenci ekleyebilirsiniz.</td></tr>`;
+                clsBody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400 font-medium">Bu sınıfta henüz öğrenci yok.</td></tr>`;
             } else {
                 current.students.forEach((st, idx) => {
                     let tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/80 transition-colors";
                     tr.innerHTML = `
-                        <td class="p-3.5 border-b text-center font-bold text-slate-400">${idx + 1}</td>
-                        <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
-                        <td class="p-3.5 border-b text-center space-x-2 no-print">
-                            <button onclick="editStudentName(${idx})" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">Düzenle</button>
-                            <button onclick="deleteStudent(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg font-semibold">Sil</button>
+                        <td class="p-3 border-b text-center font-bold text-slate-400">${idx + 1}</td>
+                        <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
+                        <td class="p-3 border-b text-center space-x-1.5 no-print">
+                            <button onclick="editStudentName(${idx})" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-lg font-semibold">Düzenle</button>
+                            <button onclick="deleteStudent(${idx})" class="text-[11px] bg-rose-50 hover:bg-rose-100 text-rose-600 px-2 py-1 rounded-lg font-semibold">Sil</button>
                         </td>
                     `;
                     clsBody.appendChild(tr);
@@ -728,14 +727,14 @@
             // 2. Render Homework Tab Dynamic Table
             const hwHeaderRow = document.getElementById('hwHeaderRow');
             hwHeaderRow.innerHTML = `
-                <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                <th class="p-3.5 border-b font-semibold text-center">Toplam Ödev Puanı</th>
-                <th class="p-3.5 border-b font-semibold text-center">Toplam Artı (+)</th>
-                <th class="p-3.5 border-b font-semibold text-center">Bonus / Ödev Sayısı</th>
+                <th class="p-3 border-b font-semibold">Öğrenci</th>
+                <th class="p-3 border-b font-semibold text-center">Puan</th>
+                <th class="p-3 border-b font-semibold text-center">Artı</th>
+                <th class="p-3 border-b font-semibold text-center">Bonus</th>
             `;
             current.homeworks.forEach((hwName) => {
                 let th = document.createElement('th');
-                th.className = "p-3.5 border-b font-semibold text-center";
+                th.className = "p-3 border-b font-semibold text-center";
                 th.textContent = hwName;
                 hwHeaderRow.appendChild(th);
             });
@@ -753,27 +752,26 @@
                 tr.className = "hover:bg-slate-50/80";
                 
                 let html = `
-                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
-                    <td class="p-3.5 border-b text-center font-bold text-emerald-600">${hwScore.toFixed(1)}</td>
-                    <td class="p-3.5 border-b text-center font-extrabold text-blue-600">${totalPlus}</td>
-                    <td class="p-3.5 border-b text-center font-bold text-amber-600">${bonusCount} / ${totalHwCount}</td>
+                    <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3 border-b text-center font-bold text-emerald-600">${hwScore.toFixed(1)}</td>
+                    <td class="p-3 border-b text-center font-extrabold text-blue-600">${totalPlus}</td>
+                    <td class="p-3 border-b text-center font-bold text-amber-600">${bonusCount}/${totalHwCount}</td>
                 `;
 
                 st.hwScores.forEach((hw, hwIdx) => {
                     let isBonusActive = hw.bonus;
                     let isSacrificed = hw.sacrificed;
-                    let bonusTitle = isSacrificed ? 'Feda Edildi (Süreçle Takas Edildi)' : 'Bonus (+4 Ekler)';
                     let displayVal = `${hw.plus}${isBonusActive && !isSacrificed ? ' (+B)' : ''}${isSacrificed ? ' (Feda)' : ''}`;
 
                     html += `
-                        <td class="p-3.5 border-b text-center">
+                        <td class="p-3 border-b text-center">
                             <span class="pdf-val">${displayVal}</span>
-                            <div class="flex items-center justify-center gap-1.5 flex-wrap no-print">
-                                <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">-</button>
-                                <span class="w-6 text-center font-bold text-xs">${hw.plus}</span>
-                                <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">+</button>
-                                <button onclick="toggleHwBonus(${stIdx}, ${hwIdx})" class="px-2 py-0.5 rounded font-bold text-xs ${isBonusActive && !isSacrificed ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}" title="${bonusTitle}">★</button>
-                                ${isBonusActive ? `<button onclick="toggleBonusSacrifice(${stIdx},${hwIdx})" class="text-[10px] px-1.5 py-0.5 rounded font-bold ${isSacrificed ? 'bg-slate-700 text-white line-through' : 'bg-slate-200 text-slate-600 hover:bg-purple-100'}" title="Süreçle takas et">${isSacrificed ? 'İptal' : 'Feda Et'}</button>` : ''}
+                            <div class="flex items-center justify-center gap-1 flex-wrap">
+                                <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">-</button>
+                                <span class="w-5 text-center font-bold text-xs">${hw.plus}</span>
+                                <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">+</button>
+                                <button onclick="toggleHwBonus(${stIdx}, ${hwIdx})" class="px-1.5 py-0.5 rounded font-bold text-xs no-print ${isBonusActive && !isSacrificed ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}" title="Bonus">★</button>
+                                ${isBonusActive ? `<button onclick="toggleBonusSacrifice(${stIdx},${hwIdx})" class="text-[10px] px-1 py-0.5 rounded font-bold no-print ${isSacrificed ? 'bg-slate-700 text-white line-through' : 'bg-slate-200 text-slate-600'}" title="Feda Et">${isSacrificed ? 'İptal' : 'Feda'}</button>` : ''}
                             </div>
                         </td>
                     `;
@@ -786,13 +784,13 @@
             // 3. Render Behavior Tab Dynamic Table
             const behHeaderRow = document.getElementById('behHeaderRow');
             behHeaderRow.innerHTML = `
-                <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                <th class="p-3.5 border-b font-semibold text-center">Net Süreç Puanı</th>
-                <th class="p-3.5 border-b font-semibold text-center">Toplam Artı / Puan (Düzeltilmiş)</th>
+                <th class="p-3 border-b font-semibold">Öğrenci</th>
+                <th class="p-3 border-b font-semibold text-center">Net Puan</th>
+                <th class="p-3 border-b font-semibold text-center">Toplam</th>
             `;
             current.behaviors.forEach(behName => {
                 let th = document.createElement('th');
-                th.className = "p-3.5 border-b font-semibold text-center";
+                th.className = "p-3 border-b font-semibold text-center";
                 th.textContent = behName;
                 behHeaderRow.appendChild(th);
             });
@@ -803,15 +801,15 @@
                 let adjustedTotalBeh = adjustedBehScoresList[stIdx];
                 let sacrificedCount = getSacrificedBonusCount(st);
                 let sacrificedInfoText = sacrificedCount > 0 
-                    ? `<div class="text-[10px] text-purple-700 font-bold">(${sacrificedCount} Bonus Feda Edildi)</div>` 
+                    ? `<div class="text-[9px] text-purple-700 font-bold">(${sacrificedCount} Feda)</div>` 
                     : '';
 
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80";
                 let html = `
-                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
-                    <td class="p-3.5 border-b font-semibold text-center text-emerald-600">${curveBehScores[stIdx].toFixed(1)}</td>
-                    <td class="p-3.5 border-b text-center">
+                    <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3 border-b font-semibold text-center text-emerald-600">${curveBehScores[stIdx].toFixed(1)}</td>
+                    <td class="p-3 border-b text-center">
                         <div class="font-bold text-blue-600">${adjustedTotalBeh}</div>
                         ${sacrificedInfoText}
                     </td>
@@ -819,12 +817,12 @@
 
                 st.behScores.forEach((bScore, bIdx) => {
                     html += `
-                        <td class="p-3.5 border-b text-center">
+                        <td class="p-3 border-b text-center">
                             <span class="pdf-val">${bScore}</span>
-                            <div class="flex items-center justify-center gap-1.5 no-print mt-1">
-                                <button onclick="updateBehScore(${stIdx}, ${bIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">-</button>
-                                <span class="w-8 text-center font-bold text-xs">${bScore}</span>
-                                <button onclick="updateBehScore(${stIdx}, ${bIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">+</button>
+                            <div class="flex items-center justify-center gap-1 mt-1">
+                                <button onclick="updateBehScore(${stIdx}, ${bIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">-</button>
+                                <span class="w-6 text-center font-bold text-xs">${bScore}</span>
+                                <button onclick="updateBehScore(${stIdx}, ${bIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">+</button>
                             </div>
                         </td>
                     `;
@@ -837,13 +835,13 @@
             // 4. Render Star Questions Tab Dynamic Table
             const starHeaderRow = document.getElementById('starHeaderRow');
             starHeaderRow.innerHTML = `
-                <th class="p-3.5 border-b font-semibold">Öğrenci</th>
-                <th class="p-3.5 border-b font-semibold text-center">Dönüştürülmüş Puan</th>
-                <th class="p-3.5 border-b font-semibold text-center">Toplam Yıldız</th>
+                <th class="p-3 border-b font-semibold">Öğrenci</th>
+                <th class="p-3 border-b font-semibold text-center">Puan</th>
+                <th class="p-3 border-b font-semibold text-center">Yıldız</th>
             `;
             current.starQuestions.forEach(sqName => {
                 let th = document.createElement('th');
-                th.className = "p-3.5 border-b font-semibold text-center";
+                th.className = "p-3 border-b font-semibold text-center";
                 th.textContent = sqName;
                 starHeaderRow.appendChild(th);
             });
@@ -858,9 +856,9 @@
                 tr.className = "hover:bg-slate-50/80";
                 
                 let html = `
-                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
-                    <td class="p-3.5 border-b font-semibold text-center text-emerald-600">${finalStarScore.toFixed(1)}</td>
-                    <td class="p-3.5 border-b font-semibold text-center text-amber-600">${totalStar}</td>
+                    <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3 border-b font-semibold text-center text-emerald-600">${finalStarScore.toFixed(1)}</td>
+                    <td class="p-3 border-b font-semibold text-center text-amber-600">${totalStar}</td>
                 `;
 
                 if(!st.starScores) st.starScores = new Array(current.starQuestions.length).fill(0);
@@ -868,12 +866,12 @@
                 current.starQuestions.forEach((sq, sqIdx) => {
                     let sVal = st.starScores[sqIdx] || 0;
                     html += `
-                        <td class="p-3.5 border-b text-center">
+                        <td class="p-3 border-b text-center">
                             <span class="pdf-val">${sVal}</span>
-                            <div class="flex items-center justify-center gap-1.5 no-print mt-1">
-                                <button onclick="updateStarScore(${stIdx}, ${sqIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">-</button>
-                                <span class="w-8 text-center font-bold text-xs">${sVal}</span>
-                                <button onclick="updateStarScore(${stIdx}, ${sqIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs">+</button>
+                            <div class="flex items-center justify-center gap-1 mt-1">
+                                <button onclick="updateStarScore(${stIdx}, ${sqIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">-</button>
+                                <span class="w-6 text-center font-bold text-xs">${sVal}</span>
+                                <button onclick="updateStarScore(${stIdx}, ${sqIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">+</button>
                             </div>
                         </td>
                     `;
@@ -904,17 +902,16 @@
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80";
                 tr.innerHTML = `
-                    <td class="p-3.5 border-b font-bold text-slate-800">${st.name}</td>
-                    <td class="p-3.5 border-b font-semibold text-center text-blue-600">${hwScore.toFixed(1)}</td>
-                    <td class="p-3.5 border-b font-semibold text-center text-emerald-600">${behScore.toFixed(1)}</td>
-                    <td class="p-3.5 border-b font-semibold text-center text-amber-600">${starScore.toFixed(1)}</td>
-                    <td class="p-3.5 border-b font-black text-center text-slate-900 bg-slate-50/50">${generalScore.toFixed(1)}</td>
+                    <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
+                    <td class="p-3 border-b font-semibold text-center text-blue-600">${hwScore.toFixed(1)}</td>
+                    <td class="p-3 border-b font-semibold text-center text-emerald-600">${behScore.toFixed(1)}</td>
+                    <td class="p-3 border-b font-semibold text-center text-amber-600">${starScore.toFixed(1)}</td>
+                    <td class="p-3 border-b font-black text-center text-slate-900 bg-slate-50/50">${generalScore.toFixed(1)}</td>
                 `;
                 summaryBody.appendChild(tr);
             });
         }
 
-        // Initialize application on load
         window.onload = loadFromLocalStorage;
     </script>
 </body>
