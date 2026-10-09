@@ -123,7 +123,7 @@
                     <button onclick="addHomework()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">+ Ödev Ekle</button>
                 </div>
                 <div class="text-[11px] sm:text-xs text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200">
-                    ℹ️ Bonus kazanılan ödevlerde <b>"Feda Et"</b> diyerek süreçteki 1 eksiği sildirebilirsiniz.
+                    ℹ️ Bonus kazanılan ödevlerde <b>"Feda Et"</b> diyerek süreçteki 1 eksiği sildirebilirsiniz. Değer kutusuna direkt sayı yazabilirsiniz.
                 </div>
             </div>
 
@@ -691,6 +691,18 @@
             renderUI();
         }
 
+        window.setHwPlusDirect = function(stIndex, hwIndex, val) {
+            const current = appState.classes[appState.currentClass];
+            let st = current.students[stIndex];
+            let parsed = parseInt(val);
+            if (isNaN(parsed)) parsed = 0;
+            if (parsed < 0) parsed = 0;
+            if (parsed > 4) parsed = 4; // Ödev artısı maksimum sınır kontrolü istersen kaldırılabilir, burada 0-4 arası tutuldu
+            st.hwScores[hwIndex].plus = parsed;
+            saveToLocal();
+            renderUI();
+        }
+
         window.toggleHwBonus = function(stIndex, hwIndex) {
             const current = appState.classes[appState.currentClass];
             let st = current.students[stIndex];
@@ -721,6 +733,15 @@
             renderUI();
         }
 
+        window.setBehScoreDirect = function(stIndex, behIndex, val) {
+            const current = appState.classes[appState.currentClass];
+            let parsed = parseInt(val);
+            if (isNaN(parsed)) parsed = 0;
+            current.students[stIndex].behScores[behIndex] = parsed;
+            saveToLocal();
+            renderUI();
+        }
+
         window.updateStarScore = function(stIndex, starIndex, val) {
             const current = appState.classes[appState.currentClass];
             let st = current.students[stIndex];
@@ -728,6 +749,18 @@
             let s = st.starScores[starIndex] + val;
             if (s < 0) s = 0;
             st.starScores[starIndex] = s;
+            saveToLocal();
+            renderUI();
+        }
+
+        window.setStarScoreDirect = function(stIndex, starIndex, val) {
+            const current = appState.classes[appState.currentClass];
+            let st = current.students[stIndex];
+            if(!st.starScores) st.starScores = new Array(current.starQuestions.length).fill(0);
+            let parsed = parseInt(val);
+            if (isNaN(parsed)) parsed = 0;
+            if (parsed < 0) parsed = 0;
+            st.starScores[starIndex] = parsed;
             saveToLocal();
             renderUI();
         }
@@ -947,7 +980,7 @@
                             <span class="pdf-val">${displayVal}</span>
                             <div class="flex items-center justify-center gap-1 flex-wrap">
                                 <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">-</button>
-                                <span class="w-5 text-center font-bold text-xs">${hw.plus}</span>
+                                <input type="number" value="${hw.plus}" onchange="setHwPlusDirect(${stIdx}, ${hwIdx}, this.value)" class="w-10 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded py-0.5 no-print">
                                 <button onclick="updateHwPlus(${stIdx}, ${hwIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">+</button>
                                 <button onclick="toggleHwBonus(${stIdx}, ${hwIdx})" class="px-1.5 py-0.5 rounded font-bold text-xs no-print ${isBonusActive && !isSacrificed ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}" title="Bonus">★</button>
                                 ${isBonusActive ? `<button onclick="toggleBonusSacrifice(${stIdx},${hwIdx})" class="text-[10px] px-1 py-0.5 rounded font-bold no-print ${isSacrificed ? 'bg-slate-700 text-white line-through' : 'bg-slate-200 text-slate-600'}" title="Feda Et">${isSacrificed ? 'İptal' : 'Feda'}</button>` : ''}
@@ -995,7 +1028,7 @@
                     <td class="p-3 border-b font-semibold text-slate-600">${st.no || '-'}</td>
                     <td class="p-3 border-b font-bold text-slate-800">${st.name}</td>
                     <td class="p-3 border-b font-semibold text-center text-emerald-600">${curveBehScores[stIdx].toFixed(1)}</td>
-                    <td class="p-3 border-b text-center">
+                    <td class="p-3 border-b font-semibold text-center">
                         <div class="font-bold text-blue-600">${adjustedTotalBeh}</div>
                         ${sacrificedInfoText}
                     </td>
@@ -1007,7 +1040,7 @@
                             <span class="pdf-val">${bScore}</span>
                             <div class="flex items-center justify-center gap-1 mt-1">
                                 <button onclick="updateBehScore(${stIdx}, ${bIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">-</button>
-                                <span class="w-6 text-center font-bold text-xs">${bScore}</span>
+                                <input type="number" value="${bScore}" onchange="setBehScoreDirect(${stIdx}, ${bIdx}, this.value)" class="w-10 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded py-0.5 no-print">
                                 <button onclick="updateBehScore(${stIdx}, ${bIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">+</button>
                             </div>
                         </td>
@@ -1063,7 +1096,7 @@
                             <span class="pdf-val">${sVal}</span>
                             <div class="flex items-center justify-center gap-1 mt-1">
                                 <button onclick="updateStarScore(${stIdx}, ${sqIdx}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">-</button>
-                                <span class="w-6 text-center font-bold text-xs">${sVal}</span>
+                                <input type="number" value="${sVal}" onchange="setStarScoreDirect(${stIdx}, ${sqIdx}, this.value)" class="w-10 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded py-0.5 no-print">
                                 <button onclick="updateStarScore(${stIdx}, ${sqIdx}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs no-print">+</button>
                             </div>
                         </td>
